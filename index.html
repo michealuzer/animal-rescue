@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Paws & Hope – Animal Rescue</title>
+  <title>Hellena Animal Rescue</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://www.paypal.com/sdk/js?client-id=ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0&currency=USD"></script>
   <style>
@@ -86,7 +86,7 @@
     <img src="dogs.jpg" alt="Rescue dogs"/>
     <div class="banner-text">
       <h1>Help Us Rescue Animals 🏡</h1>
-      <p>Paws &amp; Hope · Kampala, Uganda</p>
+      <p>Hellena Animal Rescue · Houston, Texas</p>
     </div>
   </div>
 
@@ -95,7 +95,7 @@
       <div class="progress-bar-fill" id="bar"></div>
     </div>
     <div class="progress-stats">
-      <span class="raised">$3,400 raised</span>
+      <span class="raised" id="raised-text">$0 raised</span>
       <span class="goal">Goal: $5,000</span>
     </div>
     <hr/>
@@ -106,36 +106,91 @@
     <div class="donate-label">Enter your amount</div>
     <div class="amount-row">
       <span>$</span>
-      <input type="number" id="donate-amount" value="10" min="1" placeholder="e.g. 10, 50, 100"/>
+      <input type="number" id="donate-amount" value="50" min="1" placeholder="e.g. 10, 50, 100"/>
     </div>
     <div id="paypal-button-container"></div>
     <div class="secure-note">🔒 Secured by PayPal · No account needed</div>
   </div>
 
   <div class="card-footer">
-    <span>👥 <strong>142</strong> donors</span>
-    <span>⏰ <strong>18 days</strong> left</span>
-    <span>💛 <strong>$3,400</strong> raised</span>
+    <span>👥 <strong id="donor-count">0</strong> donors</span>
+    <span>💛 <strong id="raised-footer">$0</strong> raised</span>
+    <span>🎯 <strong>$5,000</strong> goal</span>
   </div>
 </div>
 
 <script>
-  window.addEventListener('load', () => {
-    setTimeout(() => { document.getElementById('bar').style.width = '68%'; }, 300);
-  });
+  const SUPABASE_URL = 'https://avotknggpqstmnegokfh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2b3RrbmdncHFzdG1uZWdva2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTUwOTgsImV4cCI6MjA4OTIzMTA5OH0.8SeT9EVITgZXSGzmqMvWZFWmwpzuTyWRQZHFKt7EO_M';
+  const GOAL = 5000;
+
+  async function loadStats() {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        }
+      });
+      const data = await res.json();
+      if (data && data[0]) {
+        const { total_raised, donor_count } = data[0];
+        const pct = Math.min((total_raised / GOAL) * 100, 100);
+        document.getElementById('bar').style.width = pct + '%';
+        document.getElementById('raised-text').textContent = '$' + total_raised.toLocaleString() + ' raised';
+        document.getElementById('raised-footer').textContent = '$' + total_raised.toLocaleString();
+        document.getElementById('donor-count').textContent = donor_count;
+      }
+    } catch(e) {
+      console.log('Could not load stats');
+    }
+  }
+
+  async function updateStats(amount) {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        }
+      });
+      const data = await res.json();
+      if (data && data[0]) {
+        const newTotal = parseFloat(data[0].total_raised) + parseFloat(amount);
+        const newCount = data[0].donor_count + 1;
+        await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ total_raised: newTotal, donor_count: newCount })
+        });
+        loadStats();
+      }
+    } catch(e) {
+      console.log('Could not update stats');
+    }
+  }
+
+  loadStats();
 
   paypal.Buttons({
     createOrder: function(data, actions) {
-      const amount = document.getElementById('donate-amount').value || '10';
+      const amount = document.getElementById('donate-amount').value || '50';
       return actions.order.create({
         purchase_units: [{
-          description: 'Animal Rescue Donation – Paws & Hope',
+          description: 'Animal Rescue Donation – Hellena Animal Rescue',
           amount: { value: parseFloat(amount).toFixed(2) }
         }]
       });
     },
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
+        const amount = details.purchase_units[0].amount.value;
+        updateStats(amount);
         alert('Thank you, ' + details.payer.name.given_name + '! Your donation means the world. 🐾');
       });
     },
