@@ -87,7 +87,14 @@
     </div>
     <div id="error-msg" class="alert alert-error" style="display:none;max-width:720px;margin:0 auto 24px;"></div>
 
-    <form class="form-section" id="adoptForm" onsubmit="submitApplication(event)">
+    <form class="form-section" id="adoptForm" action="https://formspree.io/f/xeerwzod" method="POST" onsubmit="submitApplication(event)">
+
+      <!-- Formspree hidden fields -->
+      <input type="hidden" name="_subject" value="New Adoption Application — Hellena Animal Rescue"/>
+      <input type="hidden" name="_replyto" id="replyto" value=""/>
+      <input type="hidden" name="name" id="fullName" value=""/>
+      <input type="hidden" name="interest" value="Adopt"/>
+
       <h2>Tell Us About Yourself</h2>
       <p class="sub">We want to find the best match for both you and the animal.</p>
 
@@ -97,7 +104,7 @@
 
         <div class="form-group full">
           <label for="animalSelect">Animal You're Interested In</label>
-          <select class="form-select" id="animalSelect" name="animal_id" required>
+          <select class="form-select" id="animalSelect" name="animal" required>
             <option value="">Loading animals...</option>
           </select>
         </div>
@@ -107,19 +114,19 @@
 
         <div class="form-group">
           <label for="firstName">First Name *</label>
-          <input type="text" class="form-input" id="firstName" required placeholder="Jane"/>
+          <input type="text" class="form-input" id="firstName" name="first_name" required placeholder="Jane"/>
         </div>
         <div class="form-group">
           <label for="lastName">Last Name *</label>
-          <input type="text" class="form-input" id="lastName" required placeholder="Smith"/>
+          <input type="text" class="form-input" id="lastName" name="last_name" required placeholder="Smith"/>
         </div>
         <div class="form-group">
           <label for="email">Email Address *</label>
-          <input type="email" class="form-input" id="email" required placeholder="jane@example.com"/>
+          <input type="email" class="form-input" id="email" name="email" required placeholder="jane@example.com"/>
         </div>
         <div class="form-group">
           <label for="phone">Phone Number</label>
-          <input type="tel" class="form-input" id="phone" placeholder="(555) 000-0000"/>
+          <input type="tel" class="form-input" id="phone" name="phone" placeholder="(555) 000-0000"/>
         </div>
 
         <!-- Address -->
@@ -127,23 +134,23 @@
 
         <div class="form-group full">
           <label for="address">Street Address</label>
-          <input type="text" class="form-input" id="address" placeholder="123 Main St"/>
+          <input type="text" class="form-input" id="address" name="address" placeholder="123 Main St"/>
         </div>
         <div class="form-group">
           <label for="city">City</label>
-          <input type="text" class="form-input" id="city" placeholder="Houston"/>
+          <input type="text" class="form-input" id="city" name="city" placeholder="Houston"/>
         </div>
         <div class="form-group">
           <label for="state">State</label>
-          <input type="text" class="form-input" id="state" placeholder="TX"/>
+          <input type="text" class="form-input" id="state" name="state" placeholder="TX"/>
         </div>
         <div class="form-group">
           <label for="zip">ZIP Code</label>
-          <input type="text" class="form-input" id="zip" placeholder="77001"/>
+          <input type="text" class="form-input" id="zip" name="zip" placeholder="77001"/>
         </div>
         <div class="form-group">
           <label for="housingType">Housing Type</label>
-          <select class="form-select" id="housingType">
+          <select class="form-select" id="housingType" name="housing_type">
             <option value="">Select...</option>
             <option value="house">House</option>
             <option value="apartment">Apartment</option>
@@ -153,7 +160,7 @@
         </div>
         <div class="form-group" style="justify-content:flex-end;padding-bottom:4px;">
           <label class="form-check">
-            <input type="checkbox" id="hasYard"/> Do you have a fenced yard?
+            <input type="checkbox" id="hasYard" name="has_yard"/> Do you have a fenced yard?
           </label>
         </div>
 
@@ -172,11 +179,11 @@
         </div>
         <div class="form-group full" id="petDetailsGroup" style="display:none;">
           <label for="petDetails">Tell us about your other pets</label>
-          <input type="text" class="form-input" id="petDetails" placeholder="e.g., 2 cats, 1 friendly lab mix"/>
+          <input type="text" class="form-input" id="petDetails" name="pet_details" placeholder="e.g., 2 cats, 1 friendly lab mix"/>
         </div>
         <div class="form-group full" id="childrenAgesGroup" style="display:none;">
           <label for="childrenAges">Children's ages</label>
-          <input type="text" class="form-input" id="childrenAges" placeholder="e.g., 4, 8, 12"/>
+          <input type="text" class="form-input" id="childrenAges" name="children_ages" placeholder="e.g., 4, 8, 12"/>
         </div>
 
         <!-- About you -->
@@ -184,11 +191,11 @@
 
         <div class="form-group full">
           <label for="reason">Why do you want to adopt this animal? *</label>
-          <textarea class="form-textarea" id="reason" required placeholder="Tell us why you'd be a great match..."></textarea>
+          <textarea class="form-textarea" id="reason" name="message" required placeholder="Tell us why you'd be a great match..."></textarea>
         </div>
         <div class="form-group full">
           <label for="experience">Describe your experience with animals</label>
-          <textarea class="form-textarea" id="experience" placeholder="Previous pets, training experience, etc."></textarea>
+          <textarea class="form-textarea" id="experience" name="experience" placeholder="Previous pets, training experience, etc."></textarea>
         </div>
       </div>
 
@@ -269,12 +276,18 @@
     const animalSel = document.getElementById('animalSelect');
     const animalId = animalSel.value;
     const animalName = animalSel.options[animalSel.selectedIndex]?.text.split(' (')[0] || '';
+    const applicantName = (document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value).trim();
+    const email = document.getElementById('email').value;
+
+    // Populate hidden Formspree fields
+    document.getElementById('fullName').value = applicantName;
+    document.getElementById('replyto').value = email;
 
     const payload = {
       animal_id: animalId || null,
       animal_name: animalName,
-      applicant_name: (document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value).trim(),
-      email: document.getElementById('email').value,
+      applicant_name: applicantName,
+      email,
       phone: document.getElementById('phone').value,
       address: document.getElementById('address').value,
       city: document.getElementById('city').value,
@@ -290,20 +303,44 @@
       experience: document.getElementById('experience').value,
     };
 
+    const formspreePayload = {
+      name: applicantName,
+      email,
+      phone: payload.phone,
+      animal: animalName,
+      interest: 'Adopt',
+      message: [
+        payload.reason ? `Why adopting:\n${payload.reason}` : '',
+        payload.experience ? `Animal experience:\n${payload.experience}` : '',
+        payload.housing_type ? `Housing: ${payload.housing_type}` : '',
+        payload.has_yard ? 'Has fenced yard: Yes' : '',
+        payload.has_pets ? `Has other pets: ${payload.pet_details || 'Yes'}` : '',
+        payload.has_children ? `Has children (ages: ${payload.children_ages || 'N/A'})` : '',
+        payload.address ? `Address: ${payload.address}, ${payload.city}, ${payload.state} ${payload.zip}` : '',
+      ].filter(Boolean).join('\n\n'),
+      _subject: 'New Adoption Application — Hellena Animal Rescue',
+      _replyto: email,
+    };
+
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/adoption_applications', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload)
-      });
-      if (res.ok || res.status === 201) {
-        document.getElementById('adoptForm').style.display = 'none';
-        document.getElementById('success-msg').style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        const err = await res.json();
-        throw new Error(err.message || 'Submission failed');
-      }
+      await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/adoption_applications', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload)
+        }).then(res => {
+          if (!res.ok && res.status !== 201) return res.json().then(err => { throw new Error(err.message || 'Submission failed'); });
+        }),
+        fetch('https://formspree.io/f/xeerwzod', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(formspreePayload)
+        }),
+      ]);
+
+      document.getElementById('adoptForm').style.display = 'none';
+      document.getElementById('success-msg').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch(err) {
       document.getElementById('error-msg').textContent = '⚠️ ' + err.message + '. Please try again.';
       document.getElementById('error-msg').style.display = 'block';
