@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff Login — Hellena Animal Rescue</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    .login-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+    .login-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-lg);
+    }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo .paw { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+    .login-logo h1 { font-size: 1.3rem; font-weight: 800; color: var(--brown-dark); }
+    .login-logo p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+    .login-form { display: flex; flex-direction: column; gap: 16px; }
+    .divider { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin: 8px 0; position: relative; }
+    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: var(--border-mid); }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-logo"><span class="paw">🐾</span> Hellena Animal Rescue</a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="animals.html">Adopt</a></li>
+      <li><a href="donate.html">Donate</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="paw">🐾</span>
+      <h1>Staff Login</h1>
+      <p>Sign in to manage animals, applications & fundraisers</p>
+    </div>
+
+    <div id="error-msg" class="alert alert-error" style="display:none;"></div>
+    <div id="info-msg" class="alert alert-info" style="display:none;"></div>
+
+    <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" class="form-input" id="email" required placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-input" id="password" required placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button type="submit" class="btn btn-green btn-full" id="loginBtn">Sign In</button>
+    </form>
+
+    <div class="divider" style="margin-top:24px;">New to staff portal?</div>
+    <p style="text-align:center;font-size:0.85rem;color:var(--text-muted);margin-top:12px;">
+      Contact the rescue admin to get your login credentials set up in Supabase Auth.
+    </p>
+
+    <p style="text-align:center;margin-top:20px;">
+      <a href="index.html" style="font-size:0.85rem;color:var(--green);font-weight:700;">← Back to website</a>
+    </p>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://avotknggpqstmnegokfh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2b3RrbmdncHFzdG1uZWdva2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTUwOTgsImV4cCI6MjA4OTIzMTA5OH0.8SeT9EVITgZXSGzmqMvWZFWmwpzuTyWRQZHFKt7EO_M';
+  const { createClient } = window.supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Redirect if already logged in
+  sb.auth.getSession().then(({ data }) => {
+    if (data.session) window.location.href = 'admin.html';
+  });
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    const errEl = document.getElementById('error-msg');
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+    errEl.style.display = 'none';
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.textContent = '⚠️ ' + error.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    } else {
+      window.location.href = 'admin.html';
+    }
+  }
+</script>
+</body>
+</html>

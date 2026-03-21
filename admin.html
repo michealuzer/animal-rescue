@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — Hellena Animal Rescue</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .admin-tabs { display: flex; gap: 4px; margin-bottom: 28px; flex-wrap: wrap; }
+    .admin-tab {
+      padding: 9px 18px;
+      border-radius: var(--radius);
+      background: white;
+      border: 2px solid var(--border-mid);
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--brown-light);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .admin-tab:hover { border-color: var(--green); color: var(--green); }
+    .admin-tab.active { background: var(--green); border-color: var(--green); color: white; }
+    .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+    .status-select { padding: 5px 10px; border: 1px solid var(--border-mid); border-radius: 8px; font-family: var(--font); font-size: 0.82rem; cursor: pointer; }
+    .action-btns { display: flex; gap: 6px; }
+    .mobile-admin-nav {
+      display: none;
+      background: var(--brown-dark);
+      padding: 12px 16px;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mobile-admin-nav button {
+      padding: 7px 14px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .mobile-admin-nav button.active { background: var(--green); }
+    @media (max-width: 900px) { .mobile-admin-nav { display: flex; } }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-logo"><span class="paw">🐾</span> Hellena Animal Rescue</a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span id="user-email" style="font-size:0.82rem;color:var(--text-muted);"></span>
+      <button onclick="signOut()" class="btn btn-sm btn-outline">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-admin-nav" id="mobileNav">
+  <button onclick="showPanel('dashboard')" class="active">📊 Dashboard</button>
+  <button onclick="showPanel('add-animal')">➕ Add Animal</button>
+  <button onclick="showPanel('animals')">🐾 Animals</button>
+  <button onclick="showPanel('applications')">📝 Applications</button>
+  <button onclick="showPanel('fundraisers')">💛 Fundraisers</button>
+</div>
+
+<!-- ADMIN LAYOUT -->
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <div class="admin-sidebar">
+    <div class="admin-sidebar-title">Management</div>
+    <nav>
+      <a href="#" onclick="showPanel('dashboard')" id="nav-dashboard" class="active">📊 Dashboard</a>
+      <a href="#" onclick="showPanel('add-animal')" id="nav-add-animal">➕ Add Animal</a>
+      <a href="#" onclick="showPanel('animals')" id="nav-animals">🐾 Manage Animals</a>
+      <a href="#" onclick="showPanel('applications')" id="nav-applications">📝 Applications</a>
+      <a href="#" onclick="showPanel('add-fundraiser')" id="nav-add-fundraiser">🎯 New Fundraiser</a>
+      <a href="#" onclick="showPanel('fundraisers')" id="nav-fundraisers">💛 Fundraisers</a>
+    </nav>
+    <div style="margin-top:40px;border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;">
+      <a href="index.html" style="color:rgba(255,255,255,0.5);font-size:0.85rem;">← Back to Website</a>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="admin-main">
+
+    <!-- DASHBOARD -->
+    <div class="admin-panel active" id="panel-dashboard">
+      <div class="admin-header"><h1>Dashboard</h1></div>
+      <div class="admin-stat-grid">
+        <div class="admin-stat-card"><div class="num" id="dash-available">—</div><div class="label">Available Animals</div></div>
+        <div class="admin-stat-card"><div class="num" id="dash-pending-apps">—</div><div class="label">Pending Applications</div></div>
+        <div class="admin-stat-card"><div class="num" id="dash-adopted">—</div><div class="label">Adopted Animals</div></div>
+        <div class="admin-stat-card"><div class="num" id="dash-fundraisers">—</div><div class="label">Active Fundraisers</div></div>
+      </div>
+      <div class="alert alert-info">
+        👋 Welcome to the admin dashboard. Use the sidebar to manage animals, review adoption applications, and create fundraisers.
+      </div>
+    </div>
+
+    <!-- ADD ANIMAL -->
+    <div class="admin-panel" id="panel-add-animal">
+      <div class="admin-header"><h1>Add Animal</h1></div>
+      <div id="add-animal-msg"></div>
+      <form id="addAnimalForm" onsubmit="addAnimal(event)">
+        <div class="form-section" style="max-width:100%;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Name *</label>
+              <input type="text" class="form-input" id="an-name" required placeholder="e.g. Buddy"/>
+            </div>
+            <div class="form-group">
+              <label>Species</label>
+              <select class="form-select" id="an-species">
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Breed</label>
+              <input type="text" class="form-input" id="an-breed" placeholder="e.g. Labrador Mix"/>
+            </div>
+            <div class="form-group">
+              <label>Age</label>
+              <input type="text" class="form-input" id="an-age" placeholder="e.g. 2 years"/>
+            </div>
+            <div class="form-group">
+              <label>Size</label>
+              <select class="form-select" id="an-size">
+                <option value="">Select...</option>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+                <option value="extra-large">Extra Large</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select class="form-select" id="an-gender">
+                <option value="">Select...</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Photo URL</label>
+              <input type="url" class="form-input" id="an-photo" placeholder="https://...jpg"/>
+            </div>
+            <div class="form-group full">
+              <label>Description</label>
+              <textarea class="form-textarea" id="an-desc" placeholder="Tell potential adopters about this animal's personality, history, and needs..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select class="form-select" id="an-status">
+                <option value="available">Available</option>
+                <option value="pending">Pending</option>
+                <option value="adopted">Adopted</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Posted By</label>
+              <input type="text" class="form-input" id="an-posted-by" placeholder="Staff name"/>
+            </div>
+            <div class="form-divider">Traits</div>
+            <div class="form-group">
+              <label class="form-check"><input type="checkbox" id="an-vaccinated"/> Vaccinated</label>
+            </div>
+            <div class="form-group">
+              <label class="form-check"><input type="checkbox" id="an-neutered"/> Spayed / Neutered</label>
+            </div>
+            <div class="form-group">
+              <label class="form-check"><input type="checkbox" id="an-kids" checked/> Good with Kids</label>
+            </div>
+            <div class="form-group">
+              <label class="form-check"><input type="checkbox" id="an-dogs" checked/> Good with Dogs</label>
+            </div>
+            <div class="form-group">
+              <label class="form-check"><input type="checkbox" id="an-cats" checked/> Good with Cats</label>
+            </div>
+            <div class="form-group">
+              <label class="form-check"><input type="checkbox" id="an-special"/> Special Needs</label>
+            </div>
+          </div>
+          <div style="margin-top:24px;display:flex;gap:12px;">
+            <button type="submit" class="btn btn-green" id="addAnimalBtn">Add Animal 🐾</button>
+            <button type="reset" class="btn btn-outline">Clear</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- MANAGE ANIMALS -->
+    <div class="admin-panel" id="panel-animals">
+      <div class="admin-header">
+        <h1>Manage Animals</h1>
+        <button onclick="showPanel('add-animal')" class="btn btn-green btn-sm">➕ Add Animal</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Name</th>
+              <th>Species / Breed</th>
+              <th>Age / Size</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="animals-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- APPLICATIONS -->
+    <div class="admin-panel" id="panel-applications">
+      <div class="admin-header"><h1>Adoption Applications</h1></div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Applicant</th>
+              <th>Animal</th>
+              <th>Contact</th>
+              <th>Housing</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="apps-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADD FUNDRAISER -->
+    <div class="admin-panel" id="panel-add-fundraiser">
+      <div class="admin-header"><h1>New Fundraiser</h1></div>
+      <div id="add-fundraiser-msg"></div>
+      <form id="addFundraiserForm" onsubmit="addFundraiser(event)">
+        <div class="form-section" style="max-width:100%;">
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Fundraiser Title *</label>
+              <input type="text" class="form-input" id="fr-title" required placeholder="e.g. Help Rescue Max's Vet Bills"/>
+            </div>
+            <div class="form-group">
+              <label>Organizer Name</label>
+              <input type="text" class="form-input" id="fr-organizer" placeholder="Your name"/>
+            </div>
+            <div class="form-group">
+              <label>Goal Amount ($)</label>
+              <input type="number" class="form-input" id="fr-goal" value="1000" min="1" required/>
+            </div>
+            <div class="form-group full">
+              <label>Cover Image URL</label>
+              <input type="url" class="form-input" id="fr-image" placeholder="https://...jpg"/>
+            </div>
+            <div class="form-group full">
+              <label>Description</label>
+              <textarea class="form-textarea" id="fr-desc" placeholder="Tell donors what this fundraiser is for and how the money will be used..."></textarea>
+            </div>
+          </div>
+          <div style="margin-top:24px;">
+            <button type="submit" class="btn btn-green" id="addFundraiserBtn">Create Fundraiser 🎯</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- MANAGE FUNDRAISERS -->
+    <div class="admin-panel" id="panel-fundraisers">
+      <div class="admin-header">
+        <h1>Fundraisers</h1>
+        <button onclick="showPanel('add-fundraiser')" class="btn btn-green btn-sm">➕ New Fundraiser</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Organizer</th>
+              <th>Raised / Goal</th>
+              <th>Donors</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="fundraisers-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /admin-main -->
+</div><!-- /admin-layout -->
+
+<script>
+  const SUPABASE_URL = 'https://avotknggpqstmnegokfh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2b3RrbmdncHFzdG1uZWdva2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTUwOTgsImV4cCI6MjA4OTIzMTA5OH0.8SeT9EVITgZXSGzmqMvWZFWmwpzuTyWRQZHFKt7EO_M';
+  const { createClient } = window.supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
+  // Auth guard
+  sb.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('user-email').textContent = data.session.user.email;
+      loadDashboard();
+    }
+  });
+
+  async function signOut() {
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
+  }
+
+  // Panel navigation
+  const panels = ['dashboard','add-animal','animals','applications','add-fundraiser','fundraisers'];
+  function showPanel(name) {
+    panels.forEach(p => {
+      document.getElementById('panel-' + p).classList.remove('active');
+      const nav = document.getElementById('nav-' + p);
+      if (nav) nav.classList.remove('active');
+    });
+    document.getElementById('panel-' + name).classList.add('active');
+    const nav = document.getElementById('nav-' + name);
+    if (nav) nav.classList.add('active');
+    // Update mobile nav
+    document.querySelectorAll('.mobile-admin-nav button').forEach(b => b.classList.remove('active'));
+
+    if (name === 'animals') loadAnimalsTable();
+    if (name === 'applications') loadApplicationsTable();
+    if (name === 'fundraisers') loadFundraisersTable();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return false;
+  }
+
+  // Dashboard
+  async function loadDashboard() {
+    try {
+      const [avail, apps, adopted, frs] = await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/animals?status=eq.available&select=id', { headers }).then(r => r.json()),
+        fetch(SUPABASE_URL + '/rest/v1/adoption_applications?status=eq.pending&select=id', { headers }).then(r => r.json()),
+        fetch(SUPABASE_URL + '/rest/v1/animals?status=eq.adopted&select=id', { headers }).then(r => r.json()),
+        fetch(SUPABASE_URL + '/rest/v1/fundraisers?status=eq.active&select=id', { headers }).then(r => r.json()),
+      ]);
+      document.getElementById('dash-available').textContent = (avail || []).length;
+      document.getElementById('dash-pending-apps').textContent = (apps || []).length;
+      document.getElementById('dash-adopted').textContent = (adopted || []).length;
+      document.getElementById('dash-fundraisers').textContent = (frs || []).length;
+    } catch(e) {}
+  }
+
+  // Add Animal
+  async function addAnimal(e) {
+    e.preventDefault();
+    const btn = document.getElementById('addAnimalBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    const msgEl = document.getElementById('add-animal-msg');
+
+    const payload = {
+      name: document.getElementById('an-name').value,
+      species: document.getElementById('an-species').value,
+      breed: document.getElementById('an-breed').value || null,
+      age: document.getElementById('an-age').value || null,
+      size: document.getElementById('an-size').value || null,
+      gender: document.getElementById('an-gender').value || null,
+      photo_url: document.getElementById('an-photo').value || null,
+      description: document.getElementById('an-desc').value || null,
+      status: document.getElementById('an-status').value,
+      posted_by: document.getElementById('an-posted-by').value || null,
+      vaccinated: document.getElementById('an-vaccinated').checked,
+      neutered: document.getElementById('an-neutered').checked,
+      good_with_kids: document.getElementById('an-kids').checked,
+      good_with_dogs: document.getElementById('an-dogs').checked,
+      good_with_cats: document.getElementById('an-cats').checked,
+      special_needs: document.getElementById('an-special').checked,
+    };
+
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/animals', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok || res.status === 201) {
+        msgEl.innerHTML = '<div class="alert alert-success">✅ Animal added successfully!</div>';
+        document.getElementById('addAnimalForm').reset();
+        loadDashboard();
+      } else {
+        const err = await res.json();
+        throw new Error(err.message || 'Failed to add animal');
+      }
+    } catch(err) {
+      msgEl.innerHTML = `<div class="alert alert-error">⚠️ ${err.message}</div>`;
+    }
+    btn.disabled = false; btn.textContent = 'Add Animal 🐾';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Animals Table
+  async function loadAnimalsTable() {
+    const tbody = document.getElementById('animals-tbody');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Loading...</td></tr>';
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/animals?order=created_at.desc', { headers });
+      const animals = await res.json();
+      if (!animals.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">No animals yet. <a href="#" onclick="showPanel(\'add-animal\')" style="color:var(--green);">Add one</a></td></tr>';
+        return;
+      }
+      tbody.innerHTML = animals.map(a => `
+        <tr>
+          <td>${a.photo_url ? `<img src="${a.photo_url}" class="img-preview" alt="${a.name}"/>` : '🐾'}</td>
+          <td><strong>${a.name}</strong></td>
+          <td>${[a.species, a.breed].filter(Boolean).join('<br/>')}</td>
+          <td>${[a.age, a.size].filter(Boolean).join(' / ')}</td>
+          <td>
+            <select class="status-select" onchange="updateAnimalStatus('${a.id}', this.value)">
+              <option value="available" ${a.status==='available'?'selected':''}>Available</option>
+              <option value="pending" ${a.status==='pending'?'selected':''}>Pending</option>
+              <option value="adopted" ${a.status==='adopted'?'selected':''}>Adopted</option>
+            </select>
+          </td>
+          <td>
+            <div class="action-btns">
+              <button onclick="deleteAnimal('${a.id}')" class="btn btn-red btn-sm">Delete</button>
+            </div>
+          </td>
+        </tr>`).join('');
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Error loading animals.</td></tr>';
+    }
+  }
+
+  async function updateAnimalStatus(id, status) {
+    await fetch(SUPABASE_URL + '/rest/v1/animals?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status })
+    });
+    loadDashboard();
+  }
+
+  async function deleteAnimal(id) {
+    if (!confirm('Delete this animal? This cannot be undone.')) return;
+    await fetch(SUPABASE_URL + '/rest/v1/animals?id=eq.' + id, {
+      method: 'DELETE',
+      headers
+    });
+    loadAnimalsTable();
+    loadDashboard();
+  }
+
+  // Applications Table
+  async function loadApplicationsTable() {
+    const tbody = document.getElementById('apps-tbody');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Loading...</td></tr>';
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/adoption_applications?order=created_at.desc', { headers });
+      const apps = await res.json();
+      if (!apps.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">No applications yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = apps.map(a => `
+        <tr>
+          <td><strong>${a.applicant_name}</strong></td>
+          <td>${a.animal_name || '—'}</td>
+          <td>${a.email}<br/><span style="font-size:0.8rem;color:var(--text-muted);">${a.phone || ''}</span></td>
+          <td>${[a.housing_type, a.has_yard ? 'Yard' : ''].filter(Boolean).join(', ') || '—'}</td>
+          <td>
+            <select class="status-select" onchange="updateAppStatus('${a.id}', this.value)">
+              <option value="pending" ${a.status==='pending'?'selected':''}>Pending</option>
+              <option value="approved" ${a.status==='approved'?'selected':''}>Approved</option>
+              <option value="rejected" ${a.status==='rejected'?'selected':''}>Rejected</option>
+            </select>
+          </td>
+          <td style="font-size:0.82rem;color:var(--text-muted);">${new Date(a.created_at).toLocaleDateString()}</td>
+          <td>
+            <div class="action-btns">
+              <button onclick="viewApplication('${a.id}')" class="btn btn-outline btn-sm">View</button>
+              <button onclick="deleteApp('${a.id}')" class="btn btn-red btn-sm">Delete</button>
+            </div>
+          </td>
+        </tr>`).join('');
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Error loading applications.</td></tr>';
+    }
+  }
+
+  async function updateAppStatus(id, status) {
+    await fetch(SUPABASE_URL + '/rest/v1/adoption_applications?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status })
+    });
+    loadDashboard();
+  }
+
+  async function viewApplication(id) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/adoption_applications?id=eq.' + id, { headers });
+    const data = await res.json();
+    if (!data || !data[0]) return;
+    const a = data[0];
+    alert(`Application from ${a.applicant_name}
+Animal: ${a.animal_name || 'N/A'}
+Email: ${a.email}
+Phone: ${a.phone || 'N/A'}
+Address: ${[a.address, a.city, a.state, a.zip].filter(Boolean).join(', ')}
+Housing: ${a.housing_type || 'N/A'} ${a.has_yard ? '| Has yard' : ''}
+Pets: ${a.has_pets ? a.pet_details || 'Yes' : 'No'}
+Children: ${a.has_children ? a.children_ages || 'Yes' : 'No'}
+
+Reason: ${a.reason || 'N/A'}
+Experience: ${a.experience || 'N/A'}`);
+  }
+
+  async function deleteApp(id) {
+    if (!confirm('Delete this application? This cannot be undone.')) return;
+    await fetch(SUPABASE_URL + '/rest/v1/adoption_applications?id=eq.' + id, { method: 'DELETE', headers });
+    loadApplicationsTable();
+    loadDashboard();
+  }
+
+  // Add Fundraiser
+  async function addFundraiser(e) {
+    e.preventDefault();
+    const btn = document.getElementById('addFundraiserBtn');
+    btn.disabled = true; btn.textContent = 'Creating...';
+    const msgEl = document.getElementById('add-fundraiser-msg');
+
+    const payload = {
+      title: document.getElementById('fr-title').value,
+      organizer_name: document.getElementById('fr-organizer').value || null,
+      goal: parseFloat(document.getElementById('fr-goal').value),
+      image_url: document.getElementById('fr-image').value || null,
+      description: document.getElementById('fr-desc').value || null,
+      raised: 0,
+      donor_count: 0,
+      status: 'active',
+    };
+
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/fundraisers', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok || res.status === 201) {
+        msgEl.innerHTML = '<div class="alert alert-success">✅ Fundraiser created! <a href="fundraisers.html" target="_blank" style="color:var(--green-dark);">View it live →</a></div>';
+        document.getElementById('addFundraiserForm').reset();
+        loadDashboard();
+      } else {
+        const err = await res.json();
+        throw new Error(err.message || 'Failed to create fundraiser');
+      }
+    } catch(err) {
+      msgEl.innerHTML = `<div class="alert alert-error">⚠️ ${err.message}</div>`;
+    }
+    btn.disabled = false; btn.textContent = 'Create Fundraiser 🎯';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Fundraisers Table
+  async function loadFundraisersTable() {
+    const tbody = document.getElementById('fundraisers-tbody');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Loading...</td></tr>';
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/fundraisers?order=created_at.desc', { headers });
+      const frs = await res.json();
+      if (!frs.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">No fundraisers yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = frs.map(f => `
+        <tr>
+          <td><strong>${f.title}</strong></td>
+          <td>${f.organizer_name || '—'}</td>
+          <td>$${parseFloat(f.raised||0).toLocaleString()} / $${parseFloat(f.goal||0).toLocaleString()}</td>
+          <td>${f.donor_count || 0}</td>
+          <td>
+            <select class="status-select" onchange="updateFundraiserStatus('${f.id}', this.value)">
+              <option value="active" ${f.status==='active'?'selected':''}>Active</option>
+              <option value="completed" ${f.status==='completed'?'selected':''}>Completed</option>
+              <option value="paused" ${f.status==='paused'?'selected':''}>Paused</option>
+            </select>
+          </td>
+          <td>
+            <button onclick="deleteFundraiser('${f.id}')" class="btn btn-red btn-sm">Delete</button>
+          </td>
+        </tr>`).join('');
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Error loading fundraisers.</td></tr>';
+    }
+  }
+
+  async function updateFundraiserStatus(id, status) {
+    await fetch(SUPABASE_URL + '/rest/v1/fundraisers?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status })
+    });
+    loadDashboard();
+  }
+
+  async function deleteFundraiser(id) {
+    if (!confirm('Delete this fundraiser? This cannot be undone.')) return;
+    await fetch(SUPABASE_URL + '/rest/v1/fundraisers?id=eq.' + id, { method: 'DELETE', headers });
+    loadFundraisersTable();
+    loadDashboard();
+  }
+</script>
+</body>
+</html>

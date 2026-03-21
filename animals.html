@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Available Animals — Hellena Animal Rescue</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-logo"><span class="paw">🐾</span> Hellena Animal Rescue</a>
+    <button class="navbar-mobile-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    <ul class="navbar-links" id="navLinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="animals.html" class="active">Adopt</a></li>
+      <li><a href="fundraisers.html">Fundraisers</a></li>
+      <li><a href="donate.html">Donate</a></li>
+      <li><a href="animals.html" class="btn-nav">Find a Pet</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <h1>Animals Looking for Homes</h1>
+  <p>Browse our available animals and find your perfect companion. Every adoption saves a life.</p>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-inner">
+    <input type="text" class="filter-search" id="searchInput" placeholder="🔍  Search by name or breed..." oninput="filterAnimals()"/>
+    <select class="filter-select" id="filterSpecies" onchange="filterAnimals()">
+      <option value="">All Species</option>
+      <option value="dog">Dogs</option>
+      <option value="cat">Cats</option>
+      <option value="other">Other</option>
+    </select>
+    <select class="filter-select" id="filterSize" onchange="filterAnimals()">
+      <option value="">Any Size</option>
+      <option value="small">Small</option>
+      <option value="medium">Medium</option>
+      <option value="large">Large</option>
+      <option value="extra-large">Extra Large</option>
+    </select>
+    <select class="filter-select" id="filterGender" onchange="filterAnimals()">
+      <option value="">Any Gender</option>
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+    <select class="filter-select" id="filterStatus" onchange="filterAnimals()">
+      <option value="">All Statuses</option>
+      <option value="available">Available</option>
+      <option value="pending">Pending</option>
+      <option value="adopted">Adopted</option>
+    </select>
+  </div>
+</div>
+
+<!-- ANIMALS GRID -->
+<section class="section">
+  <div class="section-inner">
+    <div id="results-count" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:20px;font-weight:600;"></div>
+    <div class="animals-grid" id="animals-grid">
+      <div class="empty-state" style="grid-column:1/-1"><div class="icon">🐾</div><h3>Loading animals...</h3></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>🐾 Hellena Animal Rescue</h3>
+        <p>Rescuing, rehabilitating, and rehoming animals in the Houston, Texas area.</p>
+      </div>
+      <div class="footer-col"><h4>Adopt</h4><ul><li><a href="animals.html">Available Animals</a></li><li><a href="adopt.html">Apply to Adopt</a></li></ul></div>
+      <div class="footer-col"><h4>Give</h4><ul><li><a href="donate.html">Donate</a></li><li><a href="fundraisers.html">Fundraisers</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="login.html">Staff Login</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Hellena Animal Rescue</span>
+      <span>Made with 💛 for the animals</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const SUPABASE_URL = 'https://avotknggpqstmnegokfh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2b3RrbmdncHFzdG1uZWdva2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTUwOTgsImV4cCI6MjA4OTIzMTA5OH0.8SeT9EVITgZXSGzmqMvWZFWmwpzuTyWRQZHFKt7EO_M';
+  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
+  let allAnimals = [];
+
+  function animalCardHTML(a) {
+    const img = a.photo_url ? `<img src="${a.photo_url}" alt="${a.name}"/>` : `🐾`;
+    const traits = [];
+    if (a.vaccinated) traits.push('Vaccinated');
+    if (a.neutered) traits.push('Neutered');
+    if (a.good_with_kids) traits.push('Good w/ Kids');
+    if (a.good_with_dogs) traits.push('Good w/ Dogs');
+    if (a.good_with_cats) traits.push('Good w/ Cats');
+    if (a.special_needs) traits.push('Special Needs');
+    const canApply = a.status === 'available';
+    return `
+      <div class="animal-card">
+        <div class="animal-card-img">
+          ${img}
+          <span class="status-badge badge badge-${a.status}">${a.status}</span>
+        </div>
+        <div class="animal-card-body">
+          <div class="animal-card-name">${a.name}</div>
+          <div class="animal-card-meta">${[a.species, a.breed, a.age, a.gender, a.size].filter(Boolean).join(' · ')}</div>
+          <p class="animal-card-desc">${a.description || 'Looking for a loving forever home.'}</p>
+          ${traits.length ? `<div class="animal-card-traits">${traits.map(t=>`<span class="trait-chip">${t}</span>`).join('')}</div>` : ''}
+          <div class="animal-card-footer">
+            ${canApply
+              ? `<a href="adopt.html?animal=${a.id}&name=${encodeURIComponent(a.name)}" class="btn btn-green btn-sm btn-full">Apply to Adopt ${a.name}</a>`
+              : `<button class="btn btn-sm btn-full" style="background:var(--bg);color:var(--text-muted);border-color:var(--border-mid);cursor:default;" disabled>${a.status === 'pending' ? '⏳ Application Pending' : '🏡 Already Adopted'}</button>`
+            }
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function filterAnimals() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const species = document.getElementById('filterSpecies').value;
+    const size = document.getElementById('filterSize').value;
+    const gender = document.getElementById('filterGender').value;
+    const status = document.getElementById('filterStatus').value;
+
+    const filtered = allAnimals.filter(a => {
+      const matchSearch = !search || a.name.toLowerCase().includes(search) || (a.breed || '').toLowerCase().includes(search);
+      const matchSpecies = !species || a.species === species;
+      const matchSize = !size || a.size === size;
+      const matchGender = !gender || a.gender === gender;
+      const matchStatus = !status || a.status === status;
+      return matchSearch && matchSpecies && matchSize && matchGender && matchStatus;
+    });
+
+    const grid = document.getElementById('animals-grid');
+    const count = document.getElementById('results-count');
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><h3>No animals found</h3><p>Try adjusting your filters.</p></div>`;
+      count.textContent = '0 animals found';
+    } else {
+      grid.innerHTML = filtered.map(animalCardHTML).join('');
+      count.textContent = `${filtered.length} animal${filtered.length !== 1 ? 's' : ''} found`;
+    }
+  }
+
+  async function loadAnimals() {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/animals?order=created_at.desc', { headers });
+      allAnimals = await res.json();
+      filterAnimals();
+    } catch(e) {
+      document.getElementById('animals-grid').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">⚠️</div><h3>Could not load animals</h3><p>Please try again later.</p></div>`;
+    }
+  }
+
+  loadAnimals();
+</script>
+</body>
+</html>

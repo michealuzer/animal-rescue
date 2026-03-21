@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Donate — Hellena Animal Rescue</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://www.paypal.com/sdk/js?client-id=ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0&currency=USD"></script>
+  <style>
+    .donate-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      max-width: 480px;
+      margin: 0 auto;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .donate-card-banner {
+      position: relative;
+      height: 240px;
+      background: linear-gradient(135deg, #4a7c59, #6baf82);
+      overflow: hidden;
+    }
+    .donate-card-banner img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+    .donate-card-banner::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
+    }
+    .donate-banner-text { position: absolute; bottom: 18px; left: 22px; z-index: 2; color: white; }
+    .donate-banner-text h2 { font-size: 1.3rem; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+    .donate-banner-text p { font-size: 0.82rem; opacity: 0.85; margin-top: 3px; }
+    .donate-body { padding: 28px; }
+    .donate-label { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 10px; }
+    .amount-presets { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .amount-preset {
+      padding: 8px 16px;
+      border: 2px solid var(--border-mid);
+      border-radius: var(--radius);
+      background: white;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--brown-mid);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .amount-preset:hover, .amount-preset.selected { border-color: var(--gold); background: var(--gold-pale); color: var(--brown-dark); }
+    .amount-row {
+      display: flex;
+      align-items: center;
+      border: 2px solid var(--border-mid);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 18px;
+      background: white;
+    }
+    .amount-row:focus-within { border-color: var(--green); }
+    .amount-row span { padding: 11px 14px; background: var(--bg-section); color: var(--brown-light); font-weight: 800; font-size: 1rem; border-right: 2px solid var(--border-mid); }
+    .amount-row input { border: none; outline: none; padding: 11px 14px; font-size: 1rem; font-family: var(--font); width: 100%; color: var(--text); background: white; }
+    .secure-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; }
+    .donate-footer { background: var(--bg-section); border-top: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap; gap: 6px; }
+    .donate-footer strong { color: var(--brown); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-logo"><span class="paw">🐾</span> Hellena Animal Rescue</a>
+    <button class="navbar-mobile-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    <ul class="navbar-links" id="navLinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="animals.html">Adopt</a></li>
+      <li><a href="fundraisers.html">Fundraisers</a></li>
+      <li><a href="donate.html" class="active">Donate</a></li>
+      <li><a href="animals.html" class="btn-nav">Find a Pet</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <h1>Support Our Rescue</h1>
+  <p>100% of every donation goes directly to the animals — vet care, food, shelter, and love.</p>
+</div>
+
+<!-- DONATE SECTION -->
+<section class="section">
+  <div class="section-inner">
+    <div class="donate-card">
+      <div class="donate-card-banner">
+        <img src="dogs.jpg" alt="Rescue dogs"/>
+        <div class="donate-banner-text">
+          <h2>Help Us Rescue Animals 🏡</h2>
+          <p>Hellena Animal Rescue · Houston, Texas</p>
+        </div>
+      </div>
+
+      <div class="donate-body">
+        <div class="progress-bar-bg" style="margin-bottom:8px;">
+          <div class="progress-bar-fill" id="bar"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:20px;">
+          <span style="font-weight:800;color:var(--brown-dark);" id="raised-text">$0 raised</span>
+          <span style="color:var(--text-muted);">Goal: $5,000</span>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--border);margin-bottom:20px;"/>
+        <p style="font-size:0.92rem;color:var(--text-muted);line-height:1.75;margin-bottom:22px;">
+          We rescue, rehabilitate, and rehome abandoned and injured animals every day. Your donation covers vet care, food, and shelter. <strong>100% goes to the animals.</strong>
+        </p>
+
+        <div class="donate-label">Choose an amount</div>
+        <div class="amount-presets">
+          <button class="amount-preset" onclick="setAmount(25, this)">$25</button>
+          <button class="amount-preset selected" onclick="setAmount(50, this)">$50</button>
+          <button class="amount-preset" onclick="setAmount(100, this)">$100</button>
+          <button class="amount-preset" onclick="setAmount(250, this)">$250</button>
+        </div>
+        <div class="donate-label">Or enter your own</div>
+        <div class="amount-row">
+          <span>$</span>
+          <input type="number" id="donate-amount" value="50" min="1" placeholder="e.g. 10, 50, 100" oninput="clearPresets()"/>
+        </div>
+        <div id="paypal-button-container"></div>
+        <div class="secure-note">🔒 Secured by PayPal · No account needed</div>
+      </div>
+
+      <div class="donate-footer">
+        <span>👥 <strong id="donor-count">0</strong> donors</span>
+        <span>💛 <strong id="raised-footer">$0</strong> raised</span>
+        <span>🎯 <strong>$5,000</strong> goal</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY DONATE -->
+<section class="section section-alt">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-eyebrow">Your Impact</div>
+      <h2>Where Your Money Goes</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-icon">🏥</div>
+        <h3>Veterinary Care</h3>
+        <p>Exams, vaccinations, spay/neuter, and emergency treatments for rescued animals.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">🍖</div>
+        <h3>Food & Nutrition</h3>
+        <p>High-quality food and supplements to keep our rescue animals healthy and thriving.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">🏠</div>
+        <h3>Safe Shelter</h3>
+        <p>Clean, comfortable housing for animals while they wait for their forever homes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>🐾 Hellena Animal Rescue</h3>
+        <p>Rescuing, rehabilitating, and rehoming animals in the Houston, Texas area.</p>
+      </div>
+      <div class="footer-col"><h4>Adopt</h4><ul><li><a href="animals.html">Available Animals</a></li><li><a href="adopt.html">Apply to Adopt</a></li></ul></div>
+      <div class="footer-col"><h4>Give</h4><ul><li><a href="donate.html">Donate</a></li><li><a href="fundraisers.html">Fundraisers</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="login.html">Staff Login</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Hellena Animal Rescue</span>
+      <span>Made with 💛 for the animals</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const SUPABASE_URL = 'https://avotknggpqstmnegokfh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2b3RrbmdncHFzdG1uZWdva2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTUwOTgsImV4cCI6MjA4OTIzMTA5OH0.8SeT9EVITgZXSGzmqMvWZFWmwpzuTyWRQZHFKt7EO_M';
+  const GOAL = 5000;
+  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
+  function setAmount(val, btn) {
+    document.getElementById('donate-amount').value = val;
+    document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function clearPresets() {
+    document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
+  }
+
+  async function loadStats() {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', { headers });
+      const data = await res.json();
+      if (data && data[0]) {
+        const { total_raised, donor_count } = data[0];
+        const pct = Math.min((total_raised / GOAL) * 100, 100);
+        document.getElementById('bar').style.width = pct + '%';
+        document.getElementById('raised-text').textContent = '$' + parseFloat(total_raised).toLocaleString() + ' raised';
+        document.getElementById('raised-footer').textContent = '$' + parseFloat(total_raised).toLocaleString();
+        document.getElementById('donor-count').textContent = donor_count;
+      }
+    } catch(e) {}
+  }
+
+  async function updateStats(amount) {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', { headers });
+      const data = await res.json();
+      if (data && data[0]) {
+        const newTotal = parseFloat(data[0].total_raised) + parseFloat(amount);
+        const newCount = data[0].donor_count + 1;
+        await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', {
+          method: 'PATCH',
+          headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ total_raised: newTotal, donor_count: newCount })
+        });
+        loadStats();
+      }
+    } catch(e) {}
+  }
+
+  loadStats();
+
+  paypal.Buttons({
+    createOrder(data, actions) {
+      const amount = document.getElementById('donate-amount').value || '50';
+      return actions.order.create({
+        purchase_units: [{ description: 'Animal Rescue Donation – Hellena Animal Rescue', amount: { value: parseFloat(amount).toFixed(2) } }]
+      });
+    },
+    onApprove(data, actions) {
+      return actions.order.capture().then(details => {
+        const amount = details.purchase_units[0].amount.value;
+        updateStats(amount);
+        alert('Thank you, ' + details.payer.name.given_name + '! Your donation means the world to our animals. 🐾');
+      });
+    },
+    onError(err) { alert('Something went wrong. Please try again.'); }
+  }).render('#paypal-button-container');
+</script>
+</body>
+</html>
