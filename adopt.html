@@ -244,7 +244,7 @@
 
   async function loadAnimals() {
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/animals?status=eq.available&order=name.asc', {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/animals?status=eq.available&order=created_at.desc', {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
       });
       const animals = await res.json();
