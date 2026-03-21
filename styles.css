@@ -539,24 +539,163 @@ img { max-width: 100%; display: block; }
 .admin-table tr:hover td { background: var(--bg); }
 .admin-table-wrap { overflow-x: auto; border-radius: var(--radius-lg); }
 
+/* ── CENTRED CTA BLOCK (reusable) ────────────────────── */
+.section-cta { text-align: center; }
+.section-cta h2 { font-size: 1.8rem; font-weight: 800; color: var(--brown-dark); margin-bottom: 12px; }
+.section-cta p { color: var(--text-muted); max-width: 520px; margin: 0 auto 28px; line-height: 1.75; }
+.section-cta .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ── ABOUT GRID (index.html) ─────────────────────────── */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.about-text h2 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--brown-dark);
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+.about-text p {
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 14px;
+}
+.about-text p:last-of-type { margin-bottom: 24px; }
+.about-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.about-card { text-align: left; padding: 20px; }
+.about-card .card-icon { font-size: 2rem; margin-bottom: 8px; }
+.about-card h3 { font-size: 0.95rem; margin-bottom: 6px; }
+.about-card p { font-size: 0.83rem; color: var(--text-muted); line-height: 1.6; }
+
 /* ── RESPONSIVE ──────────────────────────────────────── */
+
+/* Tablet — 900px */
 @media (max-width: 900px) {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .admin-layout { grid-template-columns: 1fr; }
   .admin-sidebar { display: none; }
+  .about-grid { grid-template-columns: 1fr; gap: 32px; }
 }
+
+/* Mobile — 768px */
 @media (max-width: 768px) {
-  .navbar-links { display: none; flex-direction: column; position: absolute; top: 64px; left: 0; right: 0; background: white; border-bottom: 1px solid var(--border); padding: 12px 24px; gap: 2px; box-shadow: var(--shadow); }
+  /* Navbar */
+  .navbar-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    gap: 2px;
+    box-shadow: var(--shadow);
+    z-index: 99;
+  }
   .navbar-links.open { display: flex; }
   .navbar-mobile-toggle { display: block; }
-  .hero-content h1 { font-size: 2.1rem; }
+
+  /* Hero */
+  .hero { min-height: 420px; }
+  .hero-content { padding: 60px 20px; }
+  .hero-content h1 { font-size: 2rem; }
+  .hero-content p { font-size: 1rem; }
+
+  /* Page hero */
+  .page-hero { padding: 40px 20px; }
+  .page-hero h1 { font-size: 1.75rem; }
+  .page-hero p { font-size: 0.95rem; }
+
+  /* Section headings */
+  .section-header h2 { font-size: 1.65rem; }
+  .cta-section h2 { font-size: 1.75rem; }
+
+  /* Stats */
+  .stats-bar-inner { gap: 24px; }
+  .stat-item .num { font-size: 1.9rem; }
+
+  /* Filter bar — unstick on mobile so it doesn't overlap the dropdown nav */
+  .filter-bar { position: relative; top: 0; }
+  .filter-inner { flex-direction: column; align-items: stretch; }
+  .filter-search,
+  .filter-select { width: 100%; min-width: unset; }
+
+  /* Forms */
   .form-grid { grid-template-columns: 1fr; }
-  .stats-bar-inner { gap: 28px; }
+
+  /* Cards */
+  .about-cards { grid-template-columns: 1fr 1fr; gap: 12px; }
 }
+
+/* Small mobile — 480px */
 @media (max-width: 480px) {
-  .hero-content h1 { font-size: 1.7rem; }
-  .section { padding: 48px 16px; }
-  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
-  .form-section { padding: 24px 20px; }
-  .cta-section h2 { font-size: 1.7rem; }
+  /* Spacing */
+  .section { padding: 44px 16px; }
+  .cta-section { padding: 48px 16px; }
+  .page-hero { padding: 32px 16px; }
+
+  /* Hero */
+  .hero { min-height: 360px; }
+  .hero-content { padding: 48px 16px; }
+  .hero-content h1 { font-size: 1.6rem; }
+  .hero-content p { font-size: 0.95rem; margin-bottom: 24px; }
+  .hero-btns { flex-direction: column; }
+  .hero-btns .btn { width: 100%; justify-content: center; }
+
+  /* Page hero */
+  .page-hero h1 { font-size: 1.5rem; }
+  .page-hero p { font-size: 0.9rem; }
+
+  /* Headings */
+  .section-header h2 { font-size: 1.45rem; }
+  .cta-section h2 { font-size: 1.5rem; }
+  .cta-section p { font-size: 0.95rem; }
+
+  /* Stats — 2 per row on small screens */
+  .stats-bar { padding: 20px 16px; }
+  .stats-bar-inner { gap: 16px; }
+  .stat-item .num { font-size: 1.6rem; }
+  .stat-item .label { font-size: 0.75rem; }
+
+  /* Footer */
+  .footer { padding: 40px 16px 24px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+  .footer-brand p { max-width: 100%; }
+
+  /* Forms */
+  .form-section { padding: 20px 16px; }
+
+  /* About cards — single column on very small screens */
+  .about-cards { grid-template-columns: 1fr; }
+
+  /* Donate card */
+  .donate-card-banner { height: 180px; }
+
+  /* Buttons */
+  .btn { padding: 10px 18px; font-size: 0.9rem; }
+  .btn-sm { padding: 7px 12px; font-size: 0.8rem; }
+
+  /* CTA blocks */
+  .section-cta h2 { font-size: 1.4rem; }
+  .section-cta p { font-size: 0.92rem; }
+  .section-cta .btn-row { flex-direction: column; align-items: center; }
+  .section-cta .btn-row .btn { width: 100%; max-width: 320px; justify-content: center; }
+
+  /* Step cards */
+  .steps-grid { gap: 16px; }
+  .step-card { padding: 24px 18px; }
+
+  /* Admin */
+  .admin-main { padding: 20px 16px; }
+  .admin-header { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
