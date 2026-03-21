@@ -54,12 +54,9 @@ img { max-width: 100%; display: block; }
 .navbar-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 1.1rem;
-  color: var(--brown-dark);
+  line-height: 0;
 }
-.navbar-logo .paw { font-size: 1.4rem; }
+.navbar-logo img { height: 44px; width: auto; }
 .navbar-links {
   display: flex;
   align-items: center;

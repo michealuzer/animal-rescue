@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Background (transparent) -->
+
+  <!-- Paw Mark Icon -->
+  <g transform="translate(16, 10)">
+
+    <!-- Main paw pad -->
+    <ellipse cx="44" cy="66" rx="18" ry="16" fill="#3d2208"/>
+
+    <!-- Top left toe -->
+    <ellipse cx="22" cy="44" rx="9" ry="11" fill="#3d2208" transform="rotate(-15 22 44)"/>
+
+    <!-- Top center-left toe -->
+    <ellipse cx="36" cy="36" rx="9" ry="11" fill="#3d2208" transform="rotate(-5 36 36)"/>
+
+    <!-- Top center-right toe -->
+    <ellipse cx="52" cy="36" rx="9" ry="11" fill="#3d2208" transform="rotate(5 52 36)"/>
+
+    <!-- Top right toe -->
+    <ellipse cx="66" cy="44" rx="9" ry="11" fill="#3d2208" transform="rotate(15 66 44)"/>
+
+    <!-- Amber heart inside main pad -->
+    <path d="M44 74 C44 74 36 67 36 62 C36 58 40 56 44 60 C48 56 52 58 52 62 C52 67 44 74 44 74Z" fill="#e8960a"/>
+
+  </g>
+
+  <!-- Divider line -->
+  <line x1="105" y1="18" x2="105" y2="102" stroke="#ecddc8" stroke-width="1.5"/>
+
+  <!-- Organization name -->
+  <text x="122" y="58" font-family="Playfair Display, Georgia, serif" font-size="32" font-weight="700" fill="#3d2208" letter-spacing="0.5">Hellena</text>
+  <text x="122" y="84" font-family="DM Sans, Arial, sans-serif" font-size="13.5" font-weight="500" fill="#7a6040" letter-spacing="3.5">ANIMAL RESCUE</text>
+
+  <!-- Amber underline accent under Hellena -->
+  <rect x="122" y="64" width="185" height="2.5" rx="1.5" fill="#e8960a"/>
+
+</svg>
