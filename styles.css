@@ -56,7 +56,7 @@ img { max-width: 100%; display: block; }
   align-items: center;
   line-height: 0;
 }
-.navbar-logo img { height: 44px; width: auto; }
+.navbar-logo img { height: 56px; width: auto; }
 .navbar-links {
   display: flex;
   align-items: center;
