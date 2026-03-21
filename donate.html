@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Donate — Hellena Animal Rescue</title>
   <link rel="stylesheet" href="styles.css"/>
+  <!-- Payment SDK — swap this tag for Stripe's when you change ACTIVE_PROVIDER in payment.js -->
   <script src="https://www.paypal.com/sdk/js?client-id=ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0&currency=USD"></script>
+  <!-- Shared config & payment abstraction -->
+  <script src="js/config.js"></script>
+  <script src="js/payment.js"></script>
   <style>
     .donate-card {
       background: white;
@@ -183,11 +187,6 @@
 </footer>
 
 <script>
-  const SUPABASE_URL = 'https://avotknggpqstmnegokfh.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2b3RrbmdncHFzdG1uZWdva2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTUwOTgsImV4cCI6MjA4OTIzMTA5OH0.8SeT9EVITgZXSGzmqMvWZFWmwpzuTyWRQZHFKt7EO_M';
-  const GOAL = 5000;
-  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
-
   function setAmount(val, btn) {
     document.getElementById('donate-amount').value = val;
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
@@ -200,54 +199,30 @@
 
   async function loadStats() {
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', { headers });
-      const data = await res.json();
-      if (data && data[0]) {
-        const { total_raised, donor_count } = data[0];
-        const pct = Math.min((total_raised / GOAL) * 100, 100);
-        document.getElementById('bar').style.width = pct + '%';
-        document.getElementById('raised-text').textContent = '$' + parseFloat(total_raised).toLocaleString() + ' raised';
-        document.getElementById('raised-footer').textContent = '$' + parseFloat(total_raised).toLocaleString();
-        document.getElementById('donor-count').textContent = donor_count;
-      }
-    } catch(e) {}
-  }
-
-  async function updateStats(amount) {
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', { headers });
-      const data = await res.json();
-      if (data && data[0]) {
-        const newTotal = parseFloat(data[0].total_raised) + parseFloat(amount);
-        const newCount = data[0].donor_count + 1;
-        await fetch(SUPABASE_URL + '/rest/v1/donations?id=eq.1', {
-          method: 'PATCH',
-          headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ total_raised: newTotal, donor_count: newCount })
-        });
-        loadStats();
-      }
+      const res = await fetch(SUPABASE_URL + '/rest/v1/donation_stats?id=eq.1', { headers: SUPABASE_HEADERS });
+      const [s] = await res.json();
+      if (!s) return;
+      const pct = Math.min((s.total_raised / DONATION_GOAL) * 100, 100);
+      document.getElementById('bar').style.width = pct + '%';
+      document.getElementById('raised-text').textContent = '$' + parseFloat(s.total_raised).toLocaleString() + ' raised';
+      document.getElementById('raised-footer').textContent = '$' + parseFloat(s.total_raised).toLocaleString();
+      document.getElementById('donor-count').textContent = s.donor_count;
     } catch(e) {}
   }
 
   loadStats();
 
-  paypal.Buttons({
-    createOrder(data, actions) {
-      const amount = document.getElementById('donate-amount').value || '50';
-      return actions.order.create({
-        purchase_units: [{ description: 'Animal Rescue Donation – Hellena Animal Rescue', amount: { value: parseFloat(amount).toFixed(2) } }]
-      });
+  // Payment.render works with PayPal today; switch to Stripe by changing ACTIVE_PROVIDER in payment.js
+  Payment.render('paypal-button-container', {
+    getAmount: () => document.getElementById('donate-amount').value || '50',
+    description: 'Animal Rescue Donation – Hellena Animal Rescue',
+    fundraiserId: null,
+    onSuccess({ amount, payerName }) {
+      loadStats();
+      alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your donation means the world to our animals. 🐾');
     },
-    onApprove(data, actions) {
-      return actions.order.capture().then(details => {
-        const amount = details.purchase_units[0].amount.value;
-        updateStats(amount);
-        alert('Thank you, ' + details.payer.name.given_name + '! Your donation means the world to our animals. 🐾');
-      });
-    },
-    onError(err) { alert('Something went wrong. Please try again.'); }
-  }).render('#paypal-button-container');
+    onError() { alert('Something went wrong. Please try again.'); },
+  });
 </script>
 </body>
 </html>

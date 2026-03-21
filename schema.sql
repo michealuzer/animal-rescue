@@ -65,6 +65,30 @@ create table if not exists fundraisers (
   created_at timestamptz default now()
 );
 
+-- ── Individual donation records ──────────────────────────────
+-- Every completed payment is stored here regardless of provider.
+-- When you add Stripe, payment.js already writes to this table.
+create table if not exists donations (
+  id uuid default gen_random_uuid() primary key,
+  fundraiser_id uuid references fundraisers(id) on delete set null,  -- null = general donation
+  amount numeric not null,
+  payer_name text,
+  payer_email text,
+  provider text default 'paypal' check (provider in ('paypal', 'stripe')),
+  status text default 'completed' check (status in ('completed', 'refunded', 'failed')),
+  created_at timestamptz default now()
+);
+
+-- ── Global donation stats (single-row aggregate) ──────────────
+-- Keeps the donate.html progress bar fast without summing donations every time.
+create table if not exists donation_stats (
+  id integer primary key default 1 check (id = 1),  -- enforces single row
+  total_raised numeric default 0,
+  donor_count integer default 0
+);
+-- Seed the single stats row
+insert into donation_stats (id) values (1) on conflict do nothing;
+
 -- ── Row Level Security ────────────────────────────────────────
 alter table animals enable row level security;
 alter table adoption_applications enable row level security;
@@ -108,3 +132,18 @@ create policy "Allow update applications"
 
 create policy "Allow delete applications"
   on adoption_applications for delete using (true);
+
+alter table donations enable row level security;
+alter table donation_stats enable row level security;
+
+-- Anyone can record a completed donation (payment already verified by provider)
+create policy "Allow insert donations"
+  on donations for insert with check (true);
+
+-- Public can read aggregate stats (for progress bars)
+create policy "Anyone can read donation stats"
+  on donation_stats for select using (true);
+
+-- Only allow updating stats via service-role or anon (payment.js updates aggregate)
+create policy "Allow update donation stats"
+  on donation_stats for update using (true);

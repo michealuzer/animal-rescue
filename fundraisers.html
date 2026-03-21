@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fundraisers — Hellena Animal Rescue</title>
   <link rel="stylesheet" href="styles.css"/>
+  <!-- Payment SDK — swap this tag for Stripe's when you change ACTIVE_PROVIDER in payment.js -->
   <script src="https://www.paypal.com/sdk/js?client-id=ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0&currency=USD&components=buttons"></script>
+  <!-- Shared config & payment abstraction -->
+  <script src="js/config.js"></script>
+  <script src="js/payment.js"></script>
   <style>
     .donate-inline {
       border-top: 1px solid var(--border);
@@ -122,59 +126,34 @@
 </footer>
 
 <script>
-  const SUPABASE_URL = 'https://avotknggpqstmnegokfh.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2b3RrbmdncHFzdG1uZWdva2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTUwOTgsImV4cCI6MjA4OTIzMTA5OH0.8SeT9EVITgZXSGzmqMvWZFWmwpzuTyWRQZHFKt7EO_M';
-  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
-
   let fundraisers = [];
 
   function toggleDonate(id) {
-    const el = document.getElementById('donate-panel-' + id);
-    el.classList.toggle('open');
-    if (el.classList.contains('open')) {
-      const ppEl = document.getElementById('pp-' + id);
-      if (!ppEl.dataset.rendered) {
-        ppEl.dataset.rendered = 'true';
-        renderPayPalButton(id);
+    const panel = document.getElementById('donate-panel-' + id);
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+      const container = document.getElementById('pp-' + id);
+      if (!container.dataset.rendered) {
+        container.dataset.rendered = 'true';
+        renderPaymentButton(id);
       }
     }
   }
 
-  function renderPayPalButton(fundraiserId) {
+  function renderPaymentButton(fundraiserId) {
     const f = fundraisers.find(x => x.id === fundraiserId);
     if (!f) return;
-    paypal.Buttons({
-      createOrder(data, actions) {
-        const amountEl = document.getElementById('amount-' + fundraiserId);
-        const amount = amountEl ? amountEl.value : '25';
-        return actions.order.create({
-          purchase_units: [{ description: `Donation: ${f.title} — Hellena Animal Rescue`, amount: { value: parseFloat(amount || '25').toFixed(2) } }]
-        });
+    // Payment.render works with PayPal today; switch to Stripe by changing ACTIVE_PROVIDER in payment.js
+    Payment.render('pp-' + fundraiserId, {
+      getAmount: () => document.getElementById('amount-' + fundraiserId)?.value || '25',
+      description: `Donation: ${f.title} — Hellena Animal Rescue`,
+      fundraiserId,
+      onSuccess({ payerName }) {
+        alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your donation to "' + f.title + '" means everything. 🐾');
+        loadFundraisers();
       },
-      onApprove(data, actions) {
-        return actions.order.capture().then(async details => {
-          const amount = parseFloat(details.purchase_units[0].amount.value);
-          await updateFundraiser(fundraiserId, amount);
-          alert('Thank you, ' + details.payer.name.given_name + '! Your donation to "' + f.title + '" means everything. 🐾');
-          loadFundraisers();
-        });
-      },
-      onError(err) { alert('Something went wrong. Please try again.'); }
-    }).render('#pp-' + fundraiserId);
-  }
-
-  async function updateFundraiser(id, amount) {
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/fundraisers?id=eq.' + id, { headers });
-      const data = await res.json();
-      if (data && data[0]) {
-        await fetch(SUPABASE_URL + '/rest/v1/fundraisers?id=eq.' + id, {
-          method: 'PATCH',
-          headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ raised: parseFloat(data[0].raised || 0) + amount, donor_count: (data[0].donor_count || 0) + 1 })
-        });
-      }
-    } catch(e) {}
+      onError() { alert('Something went wrong. Please try again.'); },
+    });
   }
 
   function fundraiserHTML(f) {
@@ -214,7 +193,7 @@
 
   async function loadFundraisers() {
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/fundraisers?order=created_at.desc', { headers });
+      const res = await fetch(SUPABASE_URL + '/rest/v1/fundraisers?order=created_at.desc', { headers: SUPABASE_HEADERS });
       fundraisers = await res.json();
       const grid = document.getElementById('fundraisers-grid');
       if (!fundraisers || fundraisers.length === 0) {
