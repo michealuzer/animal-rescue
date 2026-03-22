@@ -1,15 +1,11 @@
 // ─────────────────────────────────────────────────────────────
 // payment.js — payment provider abstraction
 //
-// To switch to Stripe later:
-//   1. Uncomment STRIPE_PUBLISHABLE_KEY in config.js and add your key
-//   2. Add <script src="https://js.stripe.com/v3/"></script> to your HTML
-//   3. Implement your server endpoint to create a PaymentIntent
-//   4. Change ACTIVE_PROVIDER below to 'stripe'
-//   Everything else stays the same.
+// Active provider: Stripe
+// To switch back to PayPal: change ACTIVE_PROVIDER to 'paypal'
 // ─────────────────────────────────────────────────────────────
 
-const ACTIVE_PROVIDER = 'paypal'; // 'paypal' | 'stripe'
+const ACTIVE_PROVIDER = 'stripe'; // 'paypal' | 'stripe'
 
 // ── Supabase helpers ──────────────────────────────────────────
 
@@ -28,7 +24,6 @@ async function recordDonation({ amount, fundraiserId = null, payerName = null, p
       }),
     });
 
-    // Update aggregate totals on the fundraiser or the global stats row
     if (fundraiserId) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/fundraisers?id=eq.${fundraiserId}`, { headers: SUPABASE_HEADERS });
       const [f] = await res.json();
@@ -58,15 +53,6 @@ async function recordDonation({ amount, fundraiserId = null, payerName = null, p
 // ── PayPal provider ───────────────────────────────────────────
 
 const PayPalProvider = {
-  /**
-   * @param {string} containerId  - DOM id to render the button into (without #)
-   * @param {object} opts
-   *   getAmount()      → string/number  current donation amount
-   *   description      → string         order description shown to payer
-   *   fundraiserId     → string|null    Supabase fundraiser id (null for general donation)
-   *   onSuccess(info)  → void           called after payment captured
-   *   onError(err)     → void           called on failure
-   */
   render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
     paypal.Buttons({
       createOrder(data, actions) {
@@ -93,40 +79,109 @@ const PayPalProvider = {
   },
 };
 
-// ── Stripe provider (stub — ready for when you add Stripe) ────
+// ── Stripe provider ───────────────────────────────────────────
 
-// const StripeProvider = {
-//   render(containerId, { getAmount, description, fundraiserId, onSuccess, onError }) {
-//     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-//     const elements = stripe.elements();
-//     const card = elements.create('card');
-//     card.mount('#' + containerId);
-//
-//     document.getElementById(containerId).closest('form')?.addEventListener('submit', async e => {
-//       e.preventDefault();
-//       // 1. Call YOUR backend: POST /api/create-payment-intent { amount, currency: 'usd' }
-//       // 2. const { clientSecret } = await response.json()
-//       // 3. const result = await stripe.confirmCardPayment(clientSecret, { payment_method: { card } })
-//       // 4. if (result.error) { onError(result.error); return; }
-//       // 5. await recordDonation({ amount: getAmount(), fundraiserId, provider: 'stripe' })
-//       // 6. onSuccess({ amount: getAmount() })
-//     });
-//   },
-// };
+const StripeProvider = {
+  render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
+    const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+    const elements = stripe.elements();
+    const card = elements.create('card', {
+      style: {
+        base: {
+          fontFamily: "'Nunito', sans-serif",
+          fontSize: '15px',
+          color: '#3d2b1f',
+          '::placeholder': { color: '#b0957a' },
+        },
+        invalid: { color: '#e53e3e' },
+      },
+    });
+
+    const container = document.getElementById(containerId);
+    container.innerHTML = `
+      <div style="border:2px solid var(--border-mid);border-radius:var(--radius);padding:12px 14px;background:white;margin-bottom:12px;transition:border-color 0.2s;" id="stripe-card-wrap-${containerId}">
+        <div id="stripe-card-${containerId}"></div>
+      </div>
+      <div id="stripe-error-${containerId}" style="display:none;color:#e53e3e;font-size:0.82rem;margin-bottom:10px;"></div>
+      <button id="stripe-submit-${containerId}" style="width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s;">
+        💳 Pay with Card
+      </button>
+      <div style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">🔒 Secured by Stripe</div>
+    `;
+
+    card.mount('#stripe-card-' + containerId);
+
+    card.on('focus', () => {
+      const wrap = document.getElementById('stripe-card-wrap-' + containerId);
+      if (wrap) wrap.style.borderColor = 'var(--green)';
+    });
+    card.on('blur', () => {
+      const wrap = document.getElementById('stripe-card-wrap-' + containerId);
+      if (wrap) wrap.style.borderColor = 'var(--border-mid)';
+    });
+
+    const submitBtn = document.getElementById('stripe-submit-' + containerId);
+    const errorDiv = document.getElementById('stripe-error-' + containerId);
+
+    submitBtn.addEventListener('click', async () => {
+      const amount = parseFloat(getAmount() || 25);
+      if (isNaN(amount) || amount < 1) {
+        errorDiv.textContent = 'Please enter a valid amount (minimum $1).';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.textContent = 'Processing\u2026';
+      errorDiv.style.display = 'none';
+
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/create-payment-intent', {
+          method: 'POST',
+          headers: { ...SUPABASE_HEADERS, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: Math.round(amount * 100), currency: 'usd', description }),
+        });
+
+        if (!res.ok) throw new Error('Could not initialize payment. Please try again.');
+        const { clientSecret, error: fnError } = await res.json();
+        if (fnError) throw new Error(fnError);
+
+        const result = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: { card },
+        });
+
+        if (result.error) {
+          errorDiv.textContent = result.error.message;
+          errorDiv.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.textContent = '💳 Pay with Card';
+          onError(result.error);
+        } else {
+          await recordDonation({ amount, fundraiserId, provider: 'stripe' });
+          onSuccess({ amount, payerName: null });
+        }
+      } catch (e) {
+        errorDiv.textContent = e.message || 'Something went wrong. Please try again.';
+        errorDiv.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.textContent = '💳 Pay with Card';
+        onError(e);
+      }
+    });
+  },
+};
 
 // ── Public API ────────────────────────────────────────────────
 
 const Payment = {
-  /**
-   * Render a payment button into the given container.
-   * Same signature as PayPalProvider.render / StripeProvider.render above.
-   */
   render(containerId, options) {
     if (ACTIVE_PROVIDER === 'paypal') {
       PayPalProvider.render(containerId, options);
+    } else if (ACTIVE_PROVIDER === 'stripe') {
+      StripeProvider.render(containerId, options);
     }
-    // else if (ACTIVE_PROVIDER === 'stripe') {
-    //   StripeProvider.render(containerId, options);
-    // }
   },
 };
