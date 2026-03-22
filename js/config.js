@@ -18,5 +18,5 @@ const DONATION_GOAL = 5000;
 // PayPal (kept as fallback)
 const PAYPAL_CLIENT_ID = 'ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0';
 
-// Stripe — paste your publishable key from dashboard.stripe.com → Developers → API keys
-const STRIPE_PUBLISHABLE_KEY = 'pk_live_YOUR_PUBLISHABLE_KEY';
+// Stripe publishable key
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51T2oJDBh9Yv2bnbwZT3UZs536g4qE4VsYjUFagXJxAqxuoGlbWM9rZnjRiWDT27YhIgRjkgHrF3Hxfo6zjpGKVYf00JBkfIHEN';
