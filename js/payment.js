@@ -81,22 +81,12 @@ const PayPalProvider = {
 };
 
 // ── Stripe provider (Payment Element) ────────────────────────
-// Automatically shows the right payment methods per device/region:
-//   • Apple Pay   — Safari on iPhone, iPad, Mac
-//   • Google Pay  — Chrome on Android, desktop
-//   • Cash App    — US users (enable in Stripe Dashboard → Payment methods)
-//   • Link        — Stripe's 1-click checkout
-//   • Credit/debit cards — everyone
 
 const StripeProvider = {
   render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
     let debounceTimer = null;
 
-    // ── Handle redirect return (Cash App, bank redirects, etc.) ──
-    // After a redirect-based payment, Stripe sends the user back with
-    // ?payment_intent_client_secret=... in the URL. We detect that and
-    // record the donation without re-rendering the form.
     const params = new URLSearchParams(window.location.search);
     const redirectSecret = params.get('payment_intent_client_secret');
     if (redirectSecret) {
@@ -105,14 +95,12 @@ const StripeProvider = {
           const amount = paymentIntent.amount / 100;
           await recordDonation({ amount, fundraiserId, provider: 'stripe' });
           onSuccess({ amount });
-          // Remove query params from URL so a refresh doesn't re-trigger
           window.history.replaceState({}, '', window.location.pathname);
         }
       });
-      return; // Don't render the form again — payment already done
+      return;
     }
 
-    // ── Build / rebuild the payment form ─────────────────────
     async function initialize() {
       const amount = parseFloat(getAmount() || 25);
       if (isNaN(amount) || amount < 1) return;
@@ -132,9 +120,14 @@ const StripeProvider = {
           body: JSON.stringify({ amount: Math.round(amount * 100), currency: 'usd', description }),
         });
 
-        if (!res.ok) throw new Error('Could not initialize payment. Please try again.');
-        const { clientSecret, error: fnError } = await res.json();
-        if (fnError) throw new Error(fnError);
+        // Read the body regardless of status so we can show the real error
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          throw new Error(data?.error || `Server error ${res.status}`);
+        }
+
+        const { clientSecret } = data;
 
         const elements = stripe.elements({
           clientSecret,
@@ -159,7 +152,6 @@ const StripeProvider = {
           },
         });
 
-        // Payment Element renders the right methods for each user automatically
         const paymentEl = elements.create('payment', {
           layout: { type: 'tabs', defaultCollapsed: false },
           wallets: { applePay: 'auto', googlePay: 'auto' },
@@ -188,10 +180,8 @@ const StripeProvider = {
 
           const { error } = await stripe.confirmPayment({
             elements,
-            confirmParams: {
-              return_url: window.location.href, // used for redirect-based methods
-            },
-            redirect: 'if_required', // cards & wallets complete inline; others redirect
+            confirmParams: { return_url: window.location.href },
+            redirect: 'if_required',
           });
 
           if (error) {
@@ -202,7 +192,6 @@ const StripeProvider = {
             btn.textContent = `Donate $${amount.toFixed(2)}`;
             onError(error);
           } else {
-            // Inline completion (card, Apple Pay, Google Pay)
             await recordDonation({ amount, fundraiserId, provider: 'stripe' });
             onSuccess({ amount });
           }
@@ -220,8 +209,6 @@ const StripeProvider = {
 
     initialize();
 
-    // Re-initialize when the amount changes so the button label stays in sync
-    // and a fresh PaymentIntent is created with the correct amount.
     const amountInput = document.getElementById('donate-amount');
     if (amountInput) {
       amountInput.addEventListener('input', () => {
