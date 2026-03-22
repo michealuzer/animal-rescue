@@ -18,8 +18,8 @@
   <meta name="twitter:description" content="Support a cause close to your heart. Every donation helps an animal in need. Our rescue runs entirely on community support and fundraising."/>
   <meta name="twitter:image" content="https://animalresc.netlify.app/dogs.jpg"/>
   <link rel="stylesheet" href="styles.css"/>
-  <!-- Payment SDK — swap this tag for Stripe's when you change ACTIVE_PROVIDER in payment.js -->
-  <script src="https://www.paypal.com/sdk/js?client-id=ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0&currency=USD&components=buttons"></script>
+  <!-- Stripe Payment SDK -->
+  <script src="https://js.stripe.com/v3/"></script>
   <!-- Shared config & payment abstraction -->
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
@@ -60,7 +60,7 @@
       margin-top: auto;
     }
     .donate-toggle:hover { background: var(--gold); }
-    .paypal-wrap { margin-top: 10px; }
+    .stripe-wrap { margin-top: 10px; }
     .fundraiser-card-expanded { display: none; }
     .fundraiser-card-expanded.open { display: block; }
     .org-badge {
@@ -156,13 +156,12 @@
   function renderPaymentButton(fundraiserId) {
     const f = fundraisers.find(x => x.id === fundraiserId);
     if (!f) return;
-    // Payment.render works with PayPal today; switch to Stripe by changing ACTIVE_PROVIDER in payment.js
     Payment.render('pp-' + fundraiserId, {
       getAmount: () => document.getElementById('amount-' + fundraiserId)?.value || '25',
       description: `Donation: ${f.title} — Hellena Animal Rescue`,
       fundraiserId,
-      onSuccess({ payerName }) {
-        alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your donation to "' + f.title + '" means everything. 🐾');
+      onSuccess({ amount }) {
+        alert('Thank you! Your donation to "' + f.title + '" means everything. 🐾');
         loadFundraisers();
       },
       onError() { alert('Something went wrong. Please try again.'); },
@@ -189,13 +188,13 @@
           </div>
           <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">👥 ${f.donor_count || 0} donors</div>
           ${f.status === 'active'
-            ? `<button class="donate-toggle" onclick="toggleDonate('${f.id}')">💛 Donate to This Fundraiser</button>
+            ? `<button class="donate-toggle" onclick="toggleDonate('${f.id}')">💳 Donate to This Fundraiser</button>
                <div class="fundraiser-card-expanded" id="donate-panel-${f.id}">
                  <div class="donate-inline">
                    <div class="donate-inline-row">
                      <input type="number" id="amount-${f.id}" value="25" min="1" placeholder="Amount ($)"/>
                    </div>
-                   <div id="pp-${f.id}" class="paypal-wrap"></div>
+                   <div id="pp-${f.id}" class="stripe-wrap"></div>
                  </div>
                </div>`
             : `<button class="btn btn-sm btn-full" style="background:var(--bg);color:var(--text-muted);border-color:var(--border-mid);cursor:default;" disabled>Fundraiser Completed</button>`
