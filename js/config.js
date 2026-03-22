@@ -15,8 +15,8 @@ const SUPABASE_HEADERS = {
 const DONATION_GOAL = 5000;
 
 // ── Payment provider keys ─────────────────────────────────────
-// PayPal (active)
+// PayPal (kept as fallback)
 const PAYPAL_CLIENT_ID = 'ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0';
 
-// Stripe — paste your publishable key here when ready, then flip ACTIVE_PROVIDER in payment.js
-// const STRIPE_PUBLISHABLE_KEY = 'pk_live_...';
+// Stripe — paste your publishable key from dashboard.stripe.com → Developers → API keys
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_YOUR_PUBLISHABLE_KEY';
