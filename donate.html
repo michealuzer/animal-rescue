@@ -16,7 +16,8 @@
   <meta name="twitter:description" content="Your donation makes a difference. 100% of donations go directly to the animals — vet care, food, shelter, and love. Support our Houston rescue today."/>
   <meta name="twitter:image" content="https://animalresc.netlify.app/dogs.jpg"/>
   <link rel="stylesheet" href="styles.css"/>
-  <script src="https://js.stripe.com/v3/"></script>
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0&currency=USD"></script>
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
@@ -36,6 +37,7 @@
     .amount-row:focus-within { border-color: var(--green); }
     .amount-row span { padding: 11px 14px; background: var(--bg-section); color: var(--brown-light); font-weight: 800; font-size: 1rem; border-right: 2px solid var(--border-mid); }
     .amount-row input { border: none; outline: none; padding: 11px 14px; font-size: 1rem; font-family: var(--font); width: 100%; color: var(--text); background: white; }
+    .secure-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; }
     .donate-footer { background: var(--bg-section); border-top: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap; gap: 6px; }
     .donate-footer strong { color: var(--brown); }
   </style>
@@ -92,6 +94,7 @@
           <input type="number" id="donate-amount" value="50" min="1" placeholder="e.g. 10, 50, 100" oninput="clearPresets()"/>
         </div>
         <div id="payment-container"></div>
+        <div class="secure-note">🔒 Secured by PayPal · No account needed</div>
       </div>
       <div class="donate-footer">
         <span>👥 <strong id="donor-count">0</strong> donors</span>
@@ -123,7 +126,7 @@
     <h2>Make a Lasting Impact</h2>
     <p>Monthly donations ensure that we can continually provide food, shelter, and medical care to our animals while they find their forever home. Even $10 a month adds up to life-changing support.</p>
     <div class="btn-row">
-      <a href="#payment-container" class="btn btn-green" onclick="window.scrollTo({top:0,behavior:'smooth'})">💳 Donate Now</a>
+      <a href="#payment-container" class="btn btn-green" onclick="window.scrollTo({top:0,behavior:'smooth'})">💛 Donate Monthly</a>
     </div>
   </div>
 </section>
@@ -166,7 +169,10 @@
     getAmount: () => document.getElementById('donate-amount').value || '50',
     description: 'Animal Rescue Donation – Hellena Animal Rescue',
     fundraiserId: null,
-    onSuccess({ amount }) { loadStats(); alert('Thank you! Your donation means the world to our animals. 🐾'); },
+    onSuccess({ amount, payerName }) {
+      loadStats();
+      alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your donation means the world to our animals. 🐾');
+    },
     onError() { alert('Something went wrong. Please try again.'); },
   });
 </script>

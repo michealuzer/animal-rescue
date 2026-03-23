@@ -16,7 +16,8 @@
   <meta name="twitter:description" content="Support a cause close to your heart. Every donation helps an animal in need. Our rescue runs entirely on community support and fundraising."/>
   <meta name="twitter:image" content="https://animalresc.netlify.app/dogs.jpg"/>
   <link rel="stylesheet" href="styles.css"/>
-  <script src="https://js.stripe.com/v3/"></script>
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0&currency=USD&components=buttons"></script>
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
@@ -26,7 +27,7 @@
     .donate-inline-row input:focus { border-color: var(--green); }
     .donate-toggle { background: none; border: 2px solid var(--gold); color: var(--brown-dark); border-radius: var(--radius); padding: 8px 16px; font-family: var(--font); font-weight: 700; font-size: 0.85rem; cursor: pointer; width: 100%; transition: all 0.2s; margin-top: auto; }
     .donate-toggle:hover { background: var(--gold); }
-    .stripe-wrap { margin-top: 10px; }
+    .paypal-wrap { margin-top: 10px; }
     .fundraiser-card-expanded { display: none; }
     .fundraiser-card-expanded.open { display: block; }
   </style>
@@ -94,8 +95,8 @@
       getAmount: () => document.getElementById('amount-' + fundraiserId)?.value || '25',
       description: `Donation: ${f.title} — Hellena Animal Rescue`,
       fundraiserId,
-      onSuccess({ amount }) {
-        alert('Thank you! Your donation to "' + f.title + '" means everything. 🐾');
+      onSuccess({ payerName }) {
+        alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your donation to "' + f.title + '" means everything. 🐾');
         loadFundraisers();
       },
       onError() { alert('Something went wrong. Please try again.'); },
@@ -122,13 +123,13 @@
           </div>
           <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">👥 ${f.donor_count || 0} donors</div>
           ${f.status === 'active'
-            ? `<button class="donate-toggle" onclick="toggleDonate('${f.id}')">💳 Donate to This Fundraiser</button>
+            ? `<button class="donate-toggle" onclick="toggleDonate('${f.id}')"> 💛 Donate to This Fundraiser</button>
                <div class="fundraiser-card-expanded" id="donate-panel-${f.id}">
                  <div class="donate-inline">
                    <div class="donate-inline-row">
                      <input type="number" id="amount-${f.id}" value="25" min="1" placeholder="Amount ($)"/>
                    </div>
-                   <div id="pp-${f.id}" class="stripe-wrap"></div>
+                   <div id="pp-${f.id}" class="paypal-wrap"></div>
                  </div>
                </div>`
             : `<button class="btn btn-sm btn-full" style="background:var(--bg);color:var(--text-muted);border-color:var(--border-mid);cursor:default;" disabled>Fundraiser Completed</button>`

@@ -1,12 +1,11 @@
 // ─────────────────────────────────────────────────────────────
 // payment.js — payment provider abstraction
 //
-// Active provider: Stripe (Payment Element)
-// Supports: Apple Pay · Google Pay · Cash App Pay · Cards · Link
-// To switch to PayPal: change ACTIVE_PROVIDER to 'paypal'
+// Active provider: PayPal
+// To switch to Stripe: change ACTIVE_PROVIDER to 'stripe'
 // ─────────────────────────────────────────────────────────────
 
-const ACTIVE_PROVIDER = 'stripe'; // 'paypal' | 'stripe'
+const ACTIVE_PROVIDER = 'paypal'; // 'paypal' | 'stripe'
 
 // ── Supabase helpers ──────────────────────────────────────────
 
@@ -80,38 +79,62 @@ const PayPalProvider = {
   },
 };
 
-// ── Stripe provider (Payment Element) ────────────────────────
+// ── Stripe provider ───────────────────────────────────────────
 
 const StripeProvider = {
   render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-    let debounceTimer = null;
+    const elements = stripe.elements();
+    const card = elements.create('card', {
+      style: {
+        base: {
+          fontFamily: "'Nunito', sans-serif",
+          fontSize: '15px',
+          color: '#3d2b1f',
+          '::placeholder': { color: '#b0957a' },
+        },
+        invalid: { color: '#e53e3e' },
+      },
+    });
 
-    const params = new URLSearchParams(window.location.search);
-    const redirectSecret = params.get('payment_intent_client_secret');
-    if (redirectSecret) {
-      stripe.retrievePaymentIntent(redirectSecret).then(async ({ paymentIntent }) => {
-        if (paymentIntent && paymentIntent.status === 'succeeded') {
-          const amount = paymentIntent.amount / 100;
-          await recordDonation({ amount, fundraiserId, provider: 'stripe' });
-          onSuccess({ amount });
-          window.history.replaceState({}, '', window.location.pathname);
-        }
-      });
-      return;
-    }
+    const container = document.getElementById(containerId);
+    container.innerHTML = `
+      <div style="border:2px solid var(--border-mid);border-radius:var(--radius);padding:12px 14px;background:white;margin-bottom:12px;transition:border-color 0.2s;" id="stripe-card-wrap-${containerId}">
+        <div id="stripe-card-${containerId}"></div>
+      </div>
+      <div id="stripe-error-${containerId}" style="display:none;color:#e53e3e;font-size:0.82rem;margin-bottom:10px;"></div>
+      <button id="stripe-submit-${containerId}" style="width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s;">
+        💳 Pay with Card
+      </button>
+      <div style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">🔒 Secured by Stripe</div>
+    `;
 
-    async function initialize() {
+    card.mount('#stripe-card-' + containerId);
+
+    card.on('focus', () => {
+      const wrap = document.getElementById('stripe-card-wrap-' + containerId);
+      if (wrap) wrap.style.borderColor = 'var(--green)';
+    });
+    card.on('blur', () => {
+      const wrap = document.getElementById('stripe-card-wrap-' + containerId);
+      if (wrap) wrap.style.borderColor = 'var(--border-mid)';
+    });
+
+    const submitBtn = document.getElementById('stripe-submit-' + containerId);
+    const errorDiv = document.getElementById('stripe-error-' + containerId);
+
+    submitBtn.addEventListener('click', async () => {
       const amount = parseFloat(getAmount() || 25);
-      if (isNaN(amount) || amount < 1) return;
+      if (isNaN(amount) || amount < 1) {
+        errorDiv.textContent = 'Please enter a valid amount (minimum $1).';
+        errorDiv.style.display = 'block';
+        return;
+      }
 
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      container.innerHTML = `
-        <div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:0.85rem;">
-          Loading payment options…
-        </div>`;
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.textContent = 'Processing…';
+      errorDiv.style.display = 'none';
 
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/create-payment-intent', {
@@ -120,108 +143,33 @@ const StripeProvider = {
           body: JSON.stringify({ amount: Math.round(amount * 100), currency: 'usd', description }),
         });
 
-        // Read the body regardless of status so we can show the real error
-        const data = await res.json();
+        if (!res.ok) throw new Error('Could not initialize payment. Please try again.');
+        const { clientSecret, error: fnError } = await res.json();
+        if (fnError) throw new Error(fnError);
 
-        if (!res.ok || data.error) {
-          throw new Error(data?.error || `Server error ${res.status}`);
+        const result = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: { card },
+        });
+
+        if (result.error) {
+          errorDiv.textContent = result.error.message;
+          errorDiv.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.textContent = '💳 Pay with Card';
+          onError(result.error);
+        } else {
+          await recordDonation({ amount, fundraiserId, provider: 'stripe' });
+          onSuccess({ amount, payerName: null });
         }
-
-        const { clientSecret } = data;
-
-        const elements = stripe.elements({
-          clientSecret,
-          appearance: {
-            theme: 'stripe',
-            variables: {
-              colorPrimary: '#4a7c59',
-              colorBackground: '#ffffff',
-              colorText: '#3d2b1f',
-              colorTextSecondary: '#7a5c44',
-              colorDanger: '#e53e3e',
-              fontFamily: "'Nunito', sans-serif",
-              borderRadius: '8px',
-              spacingUnit: '4px',
-            },
-            rules: {
-              '.Input': { border: '2px solid #e0cfc0', boxShadow: 'none' },
-              '.Input:focus': { border: '2px solid #4a7c59', boxShadow: 'none' },
-              '.Tab': { border: '2px solid #e0cfc0' },
-              '.Tab--selected': { border: '2px solid #4a7c59', boxShadow: 'none' },
-            },
-          },
-        });
-
-        const paymentEl = elements.create('payment', {
-          layout: { type: 'tabs', defaultCollapsed: false },
-          wallets: { applePay: 'auto', googlePay: 'auto' },
-        });
-
-        container.innerHTML = `
-          <div id="stripe-pe-${containerId}" style="margin-bottom:14px;"></div>
-          <div id="stripe-err-${containerId}" style="display:none;color:#e53e3e;font-size:0.82rem;margin-bottom:10px;padding:8px 12px;background:#fff5f5;border-radius:6px;"></div>
-          <button id="stripe-btn-${containerId}" style="width:100%;padding:13px;background:var(--green);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:800;font-size:1rem;cursor:pointer;transition:opacity 0.2s;letter-spacing:0.01em;">
-            Donate $${amount.toFixed(2)}
-          </button>
-          <div style="text-align:center;font-size:0.76rem;color:var(--text-muted);margin-top:8px;">
-            🔒 Secured by Stripe &nbsp;·&nbsp; Apple Pay &nbsp;·&nbsp; Google Pay &nbsp;·&nbsp; Cards
-          </div>`;
-
-        paymentEl.mount('#stripe-pe-' + containerId);
-
-        const btn = document.getElementById('stripe-btn-' + containerId);
-        const errDiv = document.getElementById('stripe-err-' + containerId);
-
-        btn.addEventListener('click', async () => {
-          btn.disabled = true;
-          btn.style.opacity = '0.6';
-          btn.textContent = 'Processing…';
-          errDiv.style.display = 'none';
-
-          const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: { return_url: window.location.href },
-            redirect: 'if_required',
-          });
-
-          if (error) {
-            errDiv.textContent = error.message;
-            errDiv.style.display = 'block';
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.textContent = `Donate $${amount.toFixed(2)}`;
-            onError(error);
-          } else {
-            await recordDonation({ amount, fundraiserId, provider: 'stripe' });
-            onSuccess({ amount });
-          }
-        });
-
       } catch (e) {
-        const c = document.getElementById(containerId);
-        if (c) c.innerHTML = `
-          <div style="color:#e53e3e;font-size:0.85rem;padding:12px 0;">
-            ${e.message || 'Payment unavailable. Please try again.'}
-          </div>`;
+        errorDiv.textContent = e.message || 'Something went wrong. Please try again.';
+        errorDiv.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.textContent = '💳 Pay with Card';
         onError(e);
       }
-    }
-
-    initialize();
-
-    const amountInput = document.getElementById('donate-amount');
-    if (amountInput) {
-      amountInput.addEventListener('input', () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(initialize, 700);
-      });
-    }
-
-    document.querySelectorAll('.amount-preset').forEach(btn => {
-      btn.addEventListener('click', () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(initialize, 100);
-      });
     });
   },
 };
