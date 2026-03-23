@@ -55,6 +55,9 @@ async function recordDonation({ amount, fundraiserId = null, payerName = null, p
 const PayPalProvider = {
   render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
     paypal.Buttons({
+      style: {
+        label: 'donate',
+      },
       createOrder(data, actions) {
         return actions.order.create({
           purchase_units: [{
@@ -104,7 +107,7 @@ const StripeProvider = {
       </div>
       <div id="stripe-error-${containerId}" style="display:none;color:#e53e3e;font-size:0.82rem;margin-bottom:10px;"></div>
       <button id="stripe-submit-${containerId}" style="width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s;">
-        💳 Pay with Card
+        💛 Donate with Card
       </button>
       <div style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">🔒 Secured by Stripe</div>
     `;
@@ -156,7 +159,7 @@ const StripeProvider = {
           errorDiv.style.display = 'block';
           submitBtn.disabled = false;
           submitBtn.style.opacity = '1';
-          submitBtn.textContent = '💳 Pay with Card';
+          submitBtn.textContent = '💛 Donate with Card';
           onError(result.error);
         } else {
           await recordDonation({ amount, fundraiserId, provider: 'stripe' });
@@ -167,7 +170,7 @@ const StripeProvider = {
         errorDiv.style.display = 'block';
         submitBtn.disabled = false;
         submitBtn.style.opacity = '1';
-        submitBtn.textContent = '💳 Pay with Card';
+        submitBtn.textContent = '💛 Donate with Card';
         onError(e);
       }
     });
