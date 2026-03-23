@@ -221,7 +221,7 @@
       </div>
       <div class="footer-col"><h4>Adopt</h4><ul><li><a href="animals.html">Available Animals</a></li><li><a href="adopt.html">Apply to Adopt</a></li></ul></div>
       <div class="footer-col"><h4>Give</h4><ul><li><a href="donate.html">Donate</a></li><li><a href="fundraisers.html">Fundraisers</a></li></ul></div>
-      <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="mailto:hellenanimalresc@gmail.com">hellenanimalresc@gmail.com</a></li><li><a href="login.html">Staff Login</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="mailto:hellenanimalresc@gmail.com">hellenanimalresc@gmail.com</a></li></ul></div>
     </div>
     <div class="footer-bottom">
       <span>© 2025 Hellena Animal Rescue</span>
@@ -250,10 +250,8 @@
       const animals = await res.json();
       const sel = document.getElementById('animalSelect');
 
-      // Check URL params for pre-selected animal
       const params = new URLSearchParams(window.location.search);
       const preId = params.get('animal');
-      const preName = params.get('name');
 
       if (!animals || animals.length === 0) {
         sel.innerHTML = '<option value="">No animals currently available</option>';
@@ -279,7 +277,6 @@
     const applicantName = (document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value).trim();
     const email = document.getElementById('email').value;
 
-    // Populate hidden Formspree fields
     document.getElementById('fullName').value = applicantName;
     document.getElementById('replyto').value = email;
 

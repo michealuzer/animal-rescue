@@ -4,7 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Donate — Hellena Animal Rescue</title>
-  <!-- Open Graph / Social Preview -->
   <meta property="og:type" content="website"/>
   <meta property="og:site_name" content="Hellena Animal Rescue"/>
   <meta property="og:url" content="https://animalresc.netlify.app/donate.html"/>
@@ -12,66 +11,28 @@
   <meta property="og:description" content="Your donation makes a difference. 100% of donations go directly to the animals — vet care, food, shelter, and love. Support our Houston rescue today."/>
   <meta property="og:image" content="https://animalresc.netlify.app/dogs.jpg"/>
   <meta property="og:image:alt" content="Rescue dogs at Hellena Animal Rescue in Houston, Texas"/>
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="Donate — Hellena Animal Rescue"/>
   <meta name="twitter:description" content="Your donation makes a difference. 100% of donations go directly to the animals — vet care, food, shelter, and love. Support our Houston rescue today."/>
   <meta name="twitter:image" content="https://animalresc.netlify.app/dogs.jpg"/>
   <link rel="stylesheet" href="styles.css"/>
-  <!-- Stripe Payment SDK -->
   <script src="https://js.stripe.com/v3/"></script>
-  <!-- Shared config & payment abstraction -->
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
-    .donate-card {
-      background: white;
-      border-radius: var(--radius-lg);
-      max-width: 480px;
-      margin: 0 auto;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-    }
-    .donate-card-banner {
-      position: relative;
-      height: 240px;
-      background: linear-gradient(135deg, #4a7c59, #6baf82);
-      overflow: hidden;
-    }
+    .donate-card { background: white; border-radius: var(--radius-lg); max-width: 480px; margin: 0 auto; overflow: hidden; box-shadow: var(--shadow-lg); }
+    .donate-card-banner { position: relative; height: 240px; background: linear-gradient(135deg, #4a7c59, #6baf82); overflow: hidden; }
     .donate-card-banner img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
-    .donate-card-banner::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
-    }
+    .donate-card-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%); }
     .donate-banner-text { position: absolute; bottom: 18px; left: 22px; z-index: 2; color: white; }
     .donate-banner-text h2 { font-size: 1.3rem; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
     .donate-banner-text p { font-size: 0.82rem; opacity: 0.85; margin-top: 3px; }
     .donate-body { padding: 28px; }
     .donate-label { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 10px; }
     .amount-presets { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-    .amount-preset {
-      padding: 8px 16px;
-      border: 2px solid var(--border-mid);
-      border-radius: var(--radius);
-      background: white;
-      font-family: var(--font);
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--brown-mid);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    .amount-preset { padding: 8px 16px; border: 2px solid var(--border-mid); border-radius: var(--radius); background: white; font-family: var(--font); font-weight: 700; font-size: 0.9rem; color: var(--brown-mid); cursor: pointer; transition: all 0.2s; }
     .amount-preset:hover, .amount-preset.selected { border-color: var(--gold); background: var(--gold-pale); color: var(--brown-dark); }
-    .amount-row {
-      display: flex;
-      align-items: center;
-      border: 2px solid var(--border-mid);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 18px;
-      background: white;
-    }
+    .amount-row { display: flex; align-items: center; border: 2px solid var(--border-mid); border-radius: var(--radius); overflow: hidden; margin-bottom: 18px; background: white; }
     .amount-row:focus-within { border-color: var(--green); }
     .amount-row span { padding: 11px 14px; background: var(--bg-section); color: var(--brown-light); font-weight: 800; font-size: 1rem; border-right: 2px solid var(--border-mid); }
     .amount-row input { border: none; outline: none; padding: 11px 14px; font-size: 1rem; font-family: var(--font); width: 100%; color: var(--text); background: white; }
@@ -81,7 +42,6 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
   <div class="navbar-inner">
     <a href="index.html" class="navbar-logo"><img src="hellena-logo.svg" alt="Hellena Animal Rescue"/></a>
@@ -96,13 +56,11 @@
   </div>
 </nav>
 
-<!-- PAGE HERO -->
 <div class="page-hero">
   <h1>Your Donation Makes a Difference</h1>
   <p>Please support us in our fight to end animal suffering and reduce the number of animals euthanized in shelters every day. 100% of donations go to helping animals.</p>
 </div>
 
-<!-- DONATE SECTION -->
 <section class="section">
   <div class="section-inner">
     <div class="donate-card">
@@ -113,20 +71,14 @@
           <p>Hellena Animal Rescue · Houston, Texas</p>
         </div>
       </div>
-
       <div class="donate-body">
-        <div class="progress-bar-bg" style="margin-bottom:8px;">
-          <div class="progress-bar-fill" id="bar"></div>
-        </div>
+        <div class="progress-bar-bg" style="margin-bottom:8px;"><div class="progress-bar-fill" id="bar"></div></div>
         <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:20px;">
           <span style="font-weight:800;color:var(--brown-dark);" id="raised-text">$0 raised</span>
           <span style="color:var(--text-muted);">Goal: $5,000</span>
         </div>
         <hr style="border:none;border-top:1px solid var(--border);margin-bottom:20px;"/>
-        <p style="font-size:0.92rem;color:var(--text-muted);line-height:1.75;margin-bottom:22px;">
-          Our organization consists solely of volunteers, and community support through donations and fundraising makes everything possible. Monthly donations ensure we can continually provide food, shelter, and medical care to our animals while they find their forever home.
-        </p>
-
+        <p style="font-size:0.92rem;color:var(--text-muted);line-height:1.75;margin-bottom:22px;">Our organization consists solely of volunteers, and community support through donations and fundraising makes everything possible. Monthly donations ensure we can continually provide food, shelter, and medical care to our animals while they find their forever home.</p>
         <div class="donate-label">Choose an amount</div>
         <div class="amount-presets">
           <button class="amount-preset" onclick="setAmount(25, this)">$25</button>
@@ -141,7 +93,6 @@
         </div>
         <div id="payment-container"></div>
       </div>
-
       <div class="donate-footer">
         <span>👥 <strong id="donor-count">0</strong> donors</span>
         <span>💛 <strong id="raised-footer">$0</strong> raised</span>
@@ -151,7 +102,6 @@
   </div>
 </section>
 
-<!-- WHY DONATE -->
 <section class="section section-alt">
   <div class="section-inner">
     <div class="section-header">
@@ -160,26 +110,13 @@
       <p>Every dollar goes directly to providing care for our animals. Donations are tax deductible — we are a 501(c)(3) tax exempt charity.</p>
     </div>
     <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-icon">🏥</div>
-        <h3>Veterinary Care</h3>
-        <p>Exams, vaccinations, spay/neuter, and emergency treatments for every rescued animal before adoption.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-icon">🍖</div>
-        <h3>Food & Nutrition</h3>
-        <p>Quality food and supplements to keep our rescue animals healthy and thriving while they wait for their forever home.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-icon">🏠</div>
-        <h3>Safe Shelter</h3>
-        <p>Clean, comfortable foster homes and kennel care for animals in crisis — because every animal deserves safety.</p>
-      </div>
+      <div class="step-card"><div class="step-icon">🏥</div><h3>Veterinary Care</h3><p>Exams, vaccinations, spay/neuter, and emergency treatments for every rescued animal before adoption.</p></div>
+      <div class="step-card"><div class="step-icon">🍖</div><h3>Food &amp; Nutrition</h3><p>Quality food and supplements to keep our rescue animals healthy and thriving while they wait for their forever home.</p></div>
+      <div class="step-card"><div class="step-icon">🏠</div><h3>Safe Shelter</h3><p>Clean, comfortable foster homes and kennel care for animals in crisis — because every animal deserves safety.</p></div>
     </div>
   </div>
 </section>
 
-<!-- MONTHLY GIVING -->
 <section class="section">
   <div class="section-inner section-cta">
     <div class="section-eyebrow">Give Monthly</div>
@@ -191,22 +128,15 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-grid">
-      <div class="footer-brand">
-        <h3>🐾 Hellena Animal Rescue</h3>
-        <p>Rescuing, rehabilitating, and rehoming animals in the Houston, Texas area.</p>
-      </div>
+      <div class="footer-brand"><h3>🐾 Hellena Animal Rescue</h3><p>Rescuing, rehabilitating, and rehoming animals in the Houston, Texas area.</p></div>
       <div class="footer-col"><h4>Adopt</h4><ul><li><a href="animals.html">Available Animals</a></li><li><a href="adopt.html">Apply to Adopt</a></li></ul></div>
       <div class="footer-col"><h4>Give</h4><ul><li><a href="donate.html">Donate</a></li><li><a href="fundraisers.html">Fundraisers</a></li></ul></div>
-      <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="mailto:hellenanimalresc@gmail.com">hellenanimalresc@gmail.com</a></li><li><a href="login.html">Staff Login</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="mailto:hellenanimalresc@gmail.com">hellenanimalresc@gmail.com</a></li></ul></div>
     </div>
-    <div class="footer-bottom">
-      <span>© 2025 Hellena Animal Rescue</span>
-      <span>Made with 💛 for the animals</span>
-    </div>
+    <div class="footer-bottom"><span>© 2025 Hellena Animal Rescue</span><span>Made with 💛 for the animals</span></div>
   </div>
 </footer>
 
@@ -216,11 +146,9 @@
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
   }
-
   function clearPresets() {
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
   }
-
   async function loadStats() {
     try {
       const res = await fetch(SUPABASE_URL + '/rest/v1/donation_stats?id=eq.1', { headers: SUPABASE_HEADERS });
@@ -233,17 +161,12 @@
       document.getElementById('donor-count').textContent = s.donor_count;
     } catch(e) {}
   }
-
   loadStats();
-
   Payment.render('payment-container', {
     getAmount: () => document.getElementById('donate-amount').value || '50',
     description: 'Animal Rescue Donation – Hellena Animal Rescue',
     fundraiserId: null,
-    onSuccess({ amount }) {
-      loadStats();
-      alert('Thank you! Your donation means the world to our animals. 🐾');
-    },
+    onSuccess({ amount }) { loadStats(); alert('Thank you! Your donation means the world to our animals. 🐾'); },
     onError() { alert('Something went wrong. Please try again.'); },
   });
 </script>

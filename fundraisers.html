@@ -4,7 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fundraisers — Hellena Animal Rescue</title>
-  <!-- Open Graph / Social Preview -->
   <meta property="og:type" content="website"/>
   <meta property="og:site_name" content="Hellena Animal Rescue"/>
   <meta property="og:url" content="https://animalresc.netlify.app/fundraisers.html"/>
@@ -12,72 +11,28 @@
   <meta property="og:description" content="Support a cause close to your heart. Every donation helps an animal in need. Our rescue runs entirely on community support and fundraising."/>
   <meta property="og:image" content="https://animalresc.netlify.app/dogs.jpg"/>
   <meta property="og:image:alt" content="Rescue dogs at Hellena Animal Rescue in Houston, Texas"/>
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="Fundraisers — Hellena Animal Rescue"/>
   <meta name="twitter:description" content="Support a cause close to your heart. Every donation helps an animal in need. Our rescue runs entirely on community support and fundraising."/>
   <meta name="twitter:image" content="https://animalresc.netlify.app/dogs.jpg"/>
   <link rel="stylesheet" href="styles.css"/>
-  <!-- Stripe Payment SDK -->
   <script src="https://js.stripe.com/v3/"></script>
-  <!-- Shared config & payment abstraction -->
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
-    .donate-inline {
-      border-top: 1px solid var(--border);
-      padding-top: 14px;
-      margin-top: 6px;
-    }
-    .donate-inline-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .donate-inline-row input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 2px solid var(--border-mid);
-      border-radius: var(--radius);
-      font-family: var(--font);
-      font-size: 0.9rem;
-      color: var(--text);
-      outline: none;
-    }
+    .donate-inline { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 6px; }
+    .donate-inline-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .donate-inline-row input { flex: 1; padding: 8px 12px; border: 2px solid var(--border-mid); border-radius: var(--radius); font-family: var(--font); font-size: 0.9rem; color: var(--text); outline: none; }
     .donate-inline-row input:focus { border-color: var(--green); }
-    .donate-toggle {
-      background: none;
-      border: 2px solid var(--gold);
-      color: var(--brown-dark);
-      border-radius: var(--radius);
-      padding: 8px 16px;
-      font-family: var(--font);
-      font-weight: 700;
-      font-size: 0.85rem;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.2s;
-      margin-top: auto;
-    }
+    .donate-toggle { background: none; border: 2px solid var(--gold); color: var(--brown-dark); border-radius: var(--radius); padding: 8px 16px; font-family: var(--font); font-weight: 700; font-size: 0.85rem; cursor: pointer; width: 100%; transition: all 0.2s; margin-top: auto; }
     .donate-toggle:hover { background: var(--gold); }
     .stripe-wrap { margin-top: 10px; }
     .fundraiser-card-expanded { display: none; }
     .fundraiser-card-expanded.open { display: block; }
-    .org-badge {
-      background: var(--bg-section);
-      border: 1px solid var(--border-mid);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 0.88rem;
-      color: var(--text-muted);
-    }
-    .org-badge strong { color: var(--brown-dark); }
   </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
   <div class="navbar-inner">
     <a href="index.html" class="navbar-logo"><img src="hellena-logo.svg" alt="Hellena Animal Rescue"/></a>
@@ -92,13 +47,11 @@
   </div>
 </nav>
 
-<!-- PAGE HERO -->
 <div class="page-hero">
   <h1>Active Fundraisers</h1>
   <p>Support a cause close to your heart. Our organization consists solely of volunteers — community fundraising is what keeps our rescue running.</p>
 </div>
 
-<!-- FUNDRAISERS -->
 <section class="section">
   <div class="section-inner">
     <div id="fundraisers-grid" class="fundraisers-grid">
@@ -107,34 +60,15 @@
   </div>
 </section>
 
-<!-- START A FUNDRAISER CTA -->
-<section class="section section-alt">
-  <div class="section-inner section-cta">
-    <div class="section-eyebrow">Get Involved</div>
-    <h2>You Can Make a Difference</h2>
-    <p>Are you passionate about animal rescue? Create a fundraiser to support our mission. Volunteers, fosters, and donations are always needed — every contribution helps us fight to end animal suffering and reduce the number of animals euthanized in shelters every day.</p>
-    <div class="btn-row">
-      <a href="login.html" class="btn btn-green">🎯 Create a Fundraiser</a>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-grid">
-      <div class="footer-brand">
-        <h3>🐾 Hellena Animal Rescue</h3>
-        <p>Rescuing, rehabilitating, and rehoming animals in the Houston, Texas area.</p>
-      </div>
+      <div class="footer-brand"><h3>🐾 Hellena Animal Rescue</h3><p>Rescuing, rehabilitating, and rehoming animals in the Houston, Texas area.</p></div>
       <div class="footer-col"><h4>Adopt</h4><ul><li><a href="animals.html">Available Animals</a></li><li><a href="adopt.html">Apply to Adopt</a></li></ul></div>
       <div class="footer-col"><h4>Give</h4><ul><li><a href="donate.html">Donate</a></li><li><a href="fundraisers.html">Fundraisers</a></li></ul></div>
-      <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="mailto:hellenanimalresc@gmail.com">hellenanimalresc@gmail.com</a></li><li><a href="login.html">Staff Login</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="mailto:hellenanimalresc@gmail.com">hellenanimalresc@gmail.com</a></li></ul></div>
     </div>
-    <div class="footer-bottom">
-      <span>© 2025 Hellena Animal Rescue</span>
-      <span>Made with 💛 for the animals</span>
-    </div>
+    <div class="footer-bottom"><span>© 2025 Hellena Animal Rescue</span><span>Made with 💛 for the animals</span></div>
   </div>
 </footer>
 
@@ -209,7 +143,7 @@
       fundraisers = await res.json();
       const grid = document.getElementById('fundraisers-grid');
       if (!fundraisers || fundraisers.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">💛</div><h3>No fundraisers yet</h3><p><a href="login.html" style="color:var(--green);font-weight:700;">Log in</a> to create the first fundraiser.</p></div>`;
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">💛</div><h3>No fundraisers yet</h3></div>`;
         return;
       }
       grid.innerHTML = fundraisers.map(fundraiserHTML).join('');
