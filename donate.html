@@ -16,33 +16,292 @@
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
-    .donate-hero { text-align: center; padding: 52px 20px 8px; }
-    .donate-hero h1 { font-size: 2rem; font-weight: 800; color: var(--brown-dark); margin-bottom: 10px; }
-    .donate-hero p { font-size: 1rem; color: var(--text-muted); max-width: 420px; margin: 0 auto; line-height: 1.7; }
-    .donate-card { background: white; border-radius: var(--radius-lg); max-width: 420px; margin: 32px auto 0; box-shadow: var(--shadow-lg); overflow: hidden; }
-    .donate-card-head { background: linear-gradient(135deg, #4a7c59, #6baf82); padding: 20px 24px; color: white; }
-    .donate-card-head h3 { font-size: 1rem; font-weight: 800; margin-bottom: 2px; }
-    .donate-card-head p { font-size: 0.8rem; opacity: 0.85; }
-    .donate-body { padding: 24px; }
-    .donate-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 10px; }
-    .freq-toggle { display: flex; border: 2px solid var(--border-mid); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
-    .freq-btn { flex: 1; padding: 10px; border: none; background: white; font-family: var(--font); font-weight: 700; font-size: 0.88rem; color: var(--brown-mid); cursor: pointer; transition: all 0.2s; }
-    .freq-btn.selected { background: var(--green); color: white; }
-    .freq-btn:hover:not(.selected) { background: var(--bg-section); }
-    .monthly-note { font-size: 0.8rem; color: var(--green); font-weight: 600; margin-bottom: 14px; display: none; }
+    /* ── Donate hero ─────────────────────────────────────── */
+    .donate-hero {
+      position: relative;
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: #1a1008;
+    }
+    .donate-hero-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 35%;
+      opacity: 0.55;
+    }
+    .donate-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(10,6,3,0.85) 0%, rgba(10,6,3,0.4) 55%, rgba(10,6,3,0.1) 100%);
+    }
+    .donate-hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 56px;
+      align-items: center;
+    }
+
+    /* ── Left copy ───────────────────────────────────────── */
+    .donate-copy {
+      color: white;
+    }
+    .donate-copy .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 13px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .donate-copy h1 {
+      font-size: 2.9rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 18px;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    }
+    .donate-copy h1 span { color: var(--gold-light); }
+    .donate-copy p {
+      font-size: 1rem;
+      opacity: 0.78;
+      line-height: 1.8;
+      max-width: 400px;
+      margin-bottom: 32px;
+    }
+    .donate-trust {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.87rem;
+      color: rgba(255,255,255,0.7);
+      font-weight: 600;
+    }
+    .trust-item .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    /* ── Donate card ─────────────────────────────────────── */
+    .donate-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+    .donate-card-head {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%);
+      padding: 20px 24px;
+    }
+    .donate-card-head h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 2px;
+    }
+    .donate-card-head p {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.72);
+    }
+    .donate-body { padding: 22px 24px 24px; }
+
+    /* Frequency toggle */
+    .freq-toggle {
+      display: flex;
+      background: var(--bg-section);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 20px;
+      gap: 4px;
+    }
+    .freq-btn {
+      flex: 1;
+      padding: 9px 10px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 0.87rem;
+      color: var(--brown-light);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .freq-btn.selected {
+      background: white;
+      color: var(--green-dark);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+    }
+    .monthly-note {
+      background: #f0faf4;
+      border: 1px solid #c3e6cb;
+      color: var(--green-dark);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+    }
     .monthly-note.visible { display: block; }
-    .amount-presets { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-    .amount-preset { padding: 8px 14px; border: 2px solid var(--border-mid); border-radius: var(--radius); background: white; font-family: var(--font); font-weight: 700; font-size: 0.88rem; color: var(--brown-mid); cursor: pointer; transition: all 0.2s; }
-    .amount-preset:hover, .amount-preset.selected { border-color: var(--gold); background: var(--gold-pale); color: var(--brown-dark); }
-    .amount-row { display: flex; align-items: center; border: 2px solid var(--border-mid); border-radius: var(--radius); overflow: hidden; margin-bottom: 18px; background: white; }
+
+    /* Amount presets */
+    .donate-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--brown-light);
+      margin-bottom: 9px;
+    }
+    .amount-presets {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+    .amount-preset {
+      padding: 9px 6px;
+      border: 2px solid var(--border-mid);
+      border-radius: 10px;
+      background: white;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 0.87rem;
+      color: var(--brown-mid);
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: center;
+    }
+    .amount-preset:hover { border-color: var(--green); color: var(--green-dark); }
+    .amount-preset.selected {
+      border-color: var(--green);
+      background: #f0faf4;
+      color: var(--green-dark);
+    }
+
+    /* Custom amount */
+    .amount-row {
+      display: flex;
+      align-items: center;
+      border: 2px solid var(--border-mid);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      background: white;
+      transition: border-color 0.2s;
+    }
     .amount-row:focus-within { border-color: var(--green); }
-    .amount-row span { padding: 11px 14px; background: var(--bg-section); color: var(--brown-light); font-weight: 800; font-size: 1rem; border-right: 2px solid var(--border-mid); }
-    .amount-row input { border: none; outline: none; padding: 11px 14px; font-size: 1rem; font-family: var(--font); width: 100%; color: var(--text); background: white; }
-    .secure-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; }
-    .impact-strip { display: flex; justify-content: center; gap: 32px; max-width: 420px; margin: 28px auto 48px; flex-wrap: wrap; }
-    .impact-item { text-align: center; font-size: 0.82rem; color: var(--text-muted); }
-    .impact-item .icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
-    .impact-item strong { display: block; color: var(--brown); font-weight: 700; font-size: 0.85rem; }
+    .amount-row .prefix {
+      padding: 11px 14px;
+      background: var(--bg-section);
+      color: var(--brown-light);
+      font-weight: 800;
+      font-size: 1rem;
+      border-right: 2px solid var(--border-mid);
+      line-height: 1;
+    }
+    .amount-row input {
+      border: none;
+      outline: none;
+      padding: 11px 14px;
+      font-size: 1rem;
+      font-family: var(--font);
+      width: 100%;
+      color: var(--text);
+      background: white;
+    }
+
+    /* Payment area */
+    #payment-container { margin-bottom: 4px; }
+    .secure-note {
+      text-align: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    /* ── Impact strip ────────────────────────────────────── */
+    .impact-strip {
+      background: var(--brown-dark);
+      padding: 28px 24px;
+    }
+    .impact-strip-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .impact-item {
+      text-align: center;
+      color: white;
+    }
+    .impact-item .icon { font-size: 1.5rem; margin-bottom: 5px; }
+    .impact-item strong {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin-bottom: 2px;
+    }
+    .impact-item span {
+      font-size: 0.78rem;
+      opacity: 0.55;
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .donate-hero { min-height: unset; }
+      .donate-hero-overlay {
+        background: linear-gradient(to bottom, rgba(10,6,3,0.65) 0%, rgba(10,6,3,0.82) 100%);
+      }
+      .donate-hero-inner {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 44px 20px 40px;
+      }
+      .donate-copy h1 { font-size: 2rem; }
+      .donate-copy p { max-width: 100%; }
+      .donate-card { max-width: 420px; margin: 0 auto; }
+    }
+    @media (max-width: 480px) {
+      .donate-hero-inner { padding: 32px 16px 36px; }
+      .donate-copy h1 { font-size: 1.65rem; }
+      .amount-presets { grid-template-columns: repeat(2, 1fr); }
+      .impact-strip-inner { gap: 24px; }
+    }
   </style>
 </head>
 <body>
@@ -61,43 +320,70 @@
   </div>
 </nav>
 
-<div class="donate-hero">
-  <h1>Help Us Save More Animals</h1>
-  <p>100% volunteer-run. 100% of donations go directly to the animals — vet care, food, and shelter.</p>
-</div>
+<!-- Hero + Form -->
+<section class="donate-hero">
+  <img class="donate-hero-bg" src="dogs.jpg" alt="Rescue dogs at Hellena Animal Rescue"/>
+  <div class="donate-hero-overlay"></div>
+  <div class="donate-hero-inner">
 
-<div class="donate-card">
-  <div class="donate-card-head">
-    <h3>Make a Donation</h3>
-    <p>Hellena Animal Rescue · Houston, Texas · 501(c)(3)</p>
-  </div>
-  <div class="donate-body">
-    <div class="freq-toggle">
-      <button class="freq-btn selected" onclick="setFreq('onetime', this)">One-time</button>
-      <button class="freq-btn" onclick="setFreq('monthly', this)">Monthly</button>
+    <!-- Left copy -->
+    <div class="donate-copy">
+      <div class="eyebrow">♥ Hellena Animal Rescue &middot; Houston, TX</div>
+      <h1>Give a rescue animal a <span>fighting chance.</span></h1>
+      <p>We are 100% volunteer-run. Every dollar goes directly to vet care, food, and safe shelter for the animals in our care.</p>
+      <div class="donate-trust">
+        <div class="trust-item"><span class="dot"></span>100% of donations reach the animals</div>
+        <div class="trust-item"><span class="dot"></span>Registered 501(c)(3) &mdash; tax deductible</div>
+        <div class="trust-item"><span class="dot"></span>No admin fees &middot; entirely volunteer-run</div>
+      </div>
     </div>
-    <p class="monthly-note" id="monthly-note">💛 Monthly gift — thank you for your ongoing support!</p>
-    <div class="donate-label">Choose an amount</div>
-    <div class="amount-presets">
-      <button class="amount-preset" data-val="25" onclick="setAmount(25, this)">$25</button>
-      <button class="amount-preset selected" data-val="50" onclick="setAmount(50, this)">$50</button>
-      <button class="amount-preset" data-val="100" onclick="setAmount(100, this)">$100</button>
-      <button class="amount-preset" data-val="250" onclick="setAmount(250, this)">$250</button>
-    </div>
-    <div class="donate-label">Or enter your own</div>
-    <div class="amount-row">
-      <span>$</span>
-      <input type="number" id="donate-amount" value="50" min="1" placeholder="e.g. 10, 50, 100" oninput="clearPresets()"/>
-    </div>
-    <div id="payment-container"></div>
-    <div class="secure-note">🔒 Secured by PayPal · No account needed</div>
-  </div>
-</div>
 
+    <!-- Donate card -->
+    <div class="donate-card">
+      <div class="donate-card-head">
+        <h3>Make a Donation</h3>
+        <p>One-time or monthly &mdash; every amount helps</p>
+      </div>
+      <div class="donate-body">
+
+        <div class="freq-toggle">
+          <button class="freq-btn selected" onclick="setFreq('onetime', this)">One-time</button>
+          <button class="freq-btn" onclick="setFreq('monthly', this)">Monthly</button>
+        </div>
+        <p class="monthly-note" id="monthly-note">💛 You're setting up a monthly gift &mdash; thank you!</p>
+
+        <div class="donate-label">Select an amount</div>
+        <div class="amount-presets">
+          <button class="amount-preset" data-val="25" onclick="setAmount(25, this)">$25</button>
+          <button class="amount-preset selected" data-val="50" onclick="setAmount(50, this)">$50</button>
+          <button class="amount-preset" data-val="100" onclick="setAmount(100, this)">$100</button>
+          <button class="amount-preset" data-val="250" onclick="setAmount(250, this)">$250</button>
+        </div>
+
+        <div class="donate-label">Or enter your own</div>
+        <div class="amount-row">
+          <span class="prefix">$</span>
+          <input type="number" id="donate-amount" value="50" min="1" placeholder="Other amount" oninput="clearPresets()"/>
+        </div>
+
+        <div id="payment-container"></div>
+        <div class="secure-note">
+          <svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="5" width="9" height="7" rx="1.5" stroke="#8a7060" stroke-width="1.4"/><path d="M3.5 5V3.5a2 2 0 0 1 4 0V5" stroke="#8a7060" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Secured by PayPal &middot; No account needed
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Impact strip -->
 <div class="impact-strip">
-  <div class="impact-item"><span class="icon">🏥</span><strong>Vet Care</strong>Every animal treated</div>
-  <div class="impact-item"><span class="icon">🍖</span><strong>Food</strong>Quality nutrition daily</div>
-  <div class="impact-item"><span class="icon">🏠</span><strong>Shelter</strong>Safe foster homes</div>
+  <div class="impact-strip-inner">
+    <div class="impact-item"><div class="icon">🏥</div><strong>Vet Care</strong><span>Every animal treated before adoption</span></div>
+    <div class="impact-item"><div class="icon">🍖</div><strong>Food & Nutrition</strong><span>Quality meals every day</span></div>
+    <div class="impact-item"><div class="icon">🏠</div><strong>Safe Shelter</strong><span>Foster homes & kennel care</span></div>
+  </div>
 </div>
 
 <footer class="footer">
@@ -108,7 +394,7 @@
       <div class="footer-col"><h4>Give</h4><ul><li><a href="donate.html">Donate</a></li><li><a href="fundraisers.html">Fundraisers</a></li></ul></div>
       <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">Houston, Texas</a></li><li><a href="mailto:hellenanimalresc@gmail.com">hellenanimalresc@gmail.com</a></li></ul></div>
     </div>
-    <div class="footer-bottom"><span>© 2025 Hellena Animal Rescue</span><span>Made with 💛 for the animals</span></div>
+    <div class="footer-bottom"><span>&copy; 2025 Hellena Animal Rescue</span><span>Made with 💛 for the animals</span></div>
   </div>
 </footer>
 
