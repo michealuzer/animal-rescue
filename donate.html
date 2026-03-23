@@ -40,6 +40,13 @@
     .secure-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; }
     .donate-footer { background: var(--bg-section); border-top: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap; gap: 6px; }
     .donate-footer strong { color: var(--brown); }
+    /* Frequency toggle */
+    .freq-toggle { display: flex; border: 2px solid var(--border-mid); border-radius: var(--radius); overflow: hidden; margin-bottom: 22px; }
+    .freq-btn { flex: 1; padding: 11px 10px; border: none; background: white; font-family: var(--font); font-weight: 700; font-size: 0.9rem; color: var(--brown-mid); cursor: pointer; transition: all 0.2s; line-height: 1; }
+    .freq-btn.selected { background: var(--green); color: white; }
+    .freq-btn:hover:not(.selected) { background: var(--bg-section); }
+    .monthly-note { font-size: 0.8rem; color: var(--green); font-weight: 600; margin-bottom: 14px; display: none; }
+    .monthly-note.visible { display: block; }
   </style>
 </head>
 <body>
@@ -80,13 +87,20 @@
           <span style="color:var(--text-muted);">Goal: $5,000</span>
         </div>
         <hr style="border:none;border-top:1px solid var(--border);margin-bottom:20px;"/>
-        <p style="font-size:0.92rem;color:var(--text-muted);line-height:1.75;margin-bottom:22px;">Our organization consists solely of volunteers, and community support through donations and fundraising makes everything possible. Monthly donations ensure we can continually provide food, shelter, and medical care to our animals while they find their forever home.</p>
+
+        <!-- Frequency toggle -->
+        <div class="freq-toggle">
+          <button class="freq-btn selected" id="btn-onetime" onclick="setFreq('onetime', this)">One-time</button>
+          <button class="freq-btn" id="btn-monthly" onclick="setFreq('monthly', this)">Monthly</button>
+        </div>
+        <p class="monthly-note" id="monthly-note">💛 You're setting up a monthly gift — thank you for your ongoing support!</p>
+
         <div class="donate-label">Choose an amount</div>
         <div class="amount-presets">
-          <button class="amount-preset" onclick="setAmount(25, this)">$25</button>
-          <button class="amount-preset selected" onclick="setAmount(50, this)">$50</button>
-          <button class="amount-preset" onclick="setAmount(100, this)">$100</button>
-          <button class="amount-preset" onclick="setAmount(250, this)">$250</button>
+          <button class="amount-preset" data-val="25" onclick="setAmount(25, this)">$25</button>
+          <button class="amount-preset selected" data-val="50" onclick="setAmount(50, this)">$50</button>
+          <button class="amount-preset" data-val="100" onclick="setAmount(100, this)">$100</button>
+          <button class="amount-preset" data-val="250" onclick="setAmount(250, this)">$250</button>
         </div>
         <div class="donate-label">Or enter your own</div>
         <div class="amount-row">
@@ -120,17 +134,6 @@
   </div>
 </section>
 
-<section class="section">
-  <div class="section-inner section-cta">
-    <div class="section-eyebrow">Give Monthly</div>
-    <h2>Make a Lasting Impact</h2>
-    <p>Monthly donations ensure that we can continually provide food, shelter, and medical care to our animals while they find their forever home. Even $10 a month adds up to life-changing support.</p>
-    <div class="btn-row">
-      <a href="#payment-container" class="btn btn-green" onclick="window.scrollTo({top:0,behavior:'smooth'})">💛 Donate Monthly</a>
-    </div>
-  </div>
-</section>
-
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-grid">
@@ -144,14 +147,31 @@
 </footer>
 
 <script>
+  let isMonthly = false;
+
+  function setFreq(type, btn) {
+    isMonthly = type === 'monthly';
+    document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    const note = document.getElementById('monthly-note');
+    note.classList.toggle('visible', isMonthly);
+    // Update preset labels
+    document.querySelectorAll('.amount-preset').forEach(b => {
+      const val = b.getAttribute('data-val');
+      b.textContent = '$' + val + (isMonthly ? '/mo' : '');
+    });
+  }
+
   function setAmount(val, btn) {
     document.getElementById('donate-amount').value = val;
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
   }
+
   function clearPresets() {
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
   }
+
   async function loadStats() {
     try {
       const res = await fetch(SUPABASE_URL + '/rest/v1/donation_stats?id=eq.1', { headers: SUPABASE_HEADERS });
@@ -164,14 +184,18 @@
       document.getElementById('donor-count').textContent = s.donor_count;
     } catch(e) {}
   }
+
   loadStats();
+
   Payment.render('payment-container', {
     getAmount: () => document.getElementById('donate-amount').value || '50',
+    getIsRecurring: () => isMonthly,
     description: 'Animal Rescue Donation – Hellena Animal Rescue',
     fundraiserId: null,
     onSuccess({ amount, payerName }) {
       loadStats();
-      alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your donation means the world to our animals. 🐾');
+      const type = isMonthly ? 'monthly ' : '';
+      alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your ' + type + 'donation means the world to our animals. 🐾');
     },
     onError() { alert('Something went wrong. Please try again.'); },
   });
