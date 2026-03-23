@@ -8,31 +8,21 @@
   <meta property="og:site_name" content="Hellena Animal Rescue"/>
   <meta property="og:url" content="https://animalresc.netlify.app/donate.html"/>
   <meta property="og:title" content="Donate — Hellena Animal Rescue"/>
-  <meta property="og:description" content="Your donation makes a difference. 100% of donations go directly to the animals — vet care, food, shelter, and love. Support our Houston rescue today."/>
+  <meta property="og:description" content="100% of your donation goes directly to the animals. Support Hellena Animal Rescue in Houston, Texas."/>
   <meta property="og:image" content="https://animalresc.netlify.app/dogs.jpg"/>
-  <meta property="og:image:alt" content="Rescue dogs at Hellena Animal Rescue in Houston, Texas"/>
   <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:title" content="Donate — Hellena Animal Rescue"/>
-  <meta name="twitter:description" content="Your donation makes a difference. 100% of donations go directly to the animals — vet care, food, shelter, and love. Support our Houston rescue today."/>
-  <meta name="twitter:image" content="https://animalresc.netlify.app/dogs.jpg"/>
   <link rel="stylesheet" href="styles.css"/>
-  <!-- PayPal SDK -->
   <script src="https://www.paypal.com/sdk/js?client-id=ASDDaM6sFt5PS6ZkYFgOEq_GsUd4N0Mu3w5n7TweRcdmmN3F08R36nqEe0pn6hMfwjmsYRLjwacy2yt0&currency=USD"></script>
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
-    .donate-layout { display: flex; gap: 56px; align-items: flex-start; max-width: 900px; margin: 0 auto; }
-    .donate-copy { flex: 1; min-width: 0; }
-    .donate-copy h2 { font-size: 1.7rem; font-weight: 800; color: var(--brown-dark); margin-bottom: 14px; line-height: 1.3; }
-    .donate-copy p { font-size: 0.97rem; color: var(--text-muted); line-height: 1.85; margin-bottom: 16px; }
-    .donate-copy .impact-list { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-direction: column; gap: 12px; }
-    .donate-copy .impact-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.93rem; color: var(--text); }
-    .donate-copy .impact-list li .icon { font-size: 1.2rem; line-height: 1; margin-top: 1px; flex-shrink: 0; }
-    .donate-copy .impact-list li strong { display: block; font-weight: 700; color: var(--brown-dark); }
-    .donate-card { width: 340px; flex-shrink: 0; background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
-    .donate-card-head { background: linear-gradient(135deg, #4a7c59, #6baf82); padding: 22px 24px 20px; color: white; }
-    .donate-card-head h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
-    .donate-card-head p { font-size: 0.82rem; opacity: 0.85; }
+    .donate-hero { text-align: center; padding: 52px 20px 8px; }
+    .donate-hero h1 { font-size: 2rem; font-weight: 800; color: var(--brown-dark); margin-bottom: 10px; }
+    .donate-hero p { font-size: 1rem; color: var(--text-muted); max-width: 420px; margin: 0 auto; line-height: 1.7; }
+    .donate-card { background: white; border-radius: var(--radius-lg); max-width: 420px; margin: 32px auto 0; box-shadow: var(--shadow-lg); overflow: hidden; }
+    .donate-card-head { background: linear-gradient(135deg, #4a7c59, #6baf82); padding: 20px 24px; color: white; }
+    .donate-card-head h3 { font-size: 1rem; font-weight: 800; margin-bottom: 2px; }
+    .donate-card-head p { font-size: 0.8rem; opacity: 0.85; }
     .donate-body { padding: 24px; }
     .donate-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 10px; }
     .freq-toggle { display: flex; border: 2px solid var(--border-mid); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
@@ -49,10 +39,10 @@
     .amount-row span { padding: 11px 14px; background: var(--bg-section); color: var(--brown-light); font-weight: 800; font-size: 1rem; border-right: 2px solid var(--border-mid); }
     .amount-row input { border: none; outline: none; padding: 11px 14px; font-size: 1rem; font-family: var(--font); width: 100%; color: var(--text); background: white; }
     .secure-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; }
-    @media (max-width: 720px) {
-      .donate-layout { flex-direction: column; }
-      .donate-card { width: 100%; }
-    }
+    .impact-strip { display: flex; justify-content: center; gap: 32px; max-width: 420px; margin: 28px auto 48px; flex-wrap: wrap; }
+    .impact-item { text-align: center; font-size: 0.82rem; color: var(--text-muted); }
+    .impact-item .icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+    .impact-item strong { display: block; color: var(--brown); font-weight: 700; font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -71,61 +61,44 @@
   </div>
 </nav>
 
-<div class="page-hero">
-  <h1>Support Our Animals</h1>
-  <p>Every dollar goes directly to the animals in our care — no admin fees, no overhead. Just love and medicine.</p>
+<div class="donate-hero">
+  <h1>Help Us Save More Animals</h1>
+  <p>100% volunteer-run. 100% of donations go directly to the animals — vet care, food, and shelter.</p>
 </div>
 
-<section class="section">
-  <div class="section-inner">
-    <div class="donate-layout">
-
-      <!-- Copy -->
-      <div class="donate-copy">
-        <h2>We run entirely on community support.</h2>
-        <p>Hellena Animal Rescue is a 100% volunteer-run organization based in Houston, Texas. We rescue dogs and cats from shelters, streets, and crisis situations — providing medical care, safe foster homes, and love until they find their forever family.</p>
-        <p>We receive no government funding. Everything we do is made possible by people like you. Your donation — whether one-time or monthly — directly funds the animals in our care right now.</p>
-        <p>Donations are tax deductible. We are a registered 501(c)(3) tax exempt charity.</p>
-        <ul class="impact-list">
-          <li><span class="icon">🏥</span><div><strong>Veterinary Care</strong>Exams, vaccinations, spay/neuter, and emergency treatment for every animal before adoption.</div></li>
-          <li><span class="icon">🍖</span><div><strong>Food &amp; Nutrition</strong>Quality food and supplements to keep animals healthy while they wait for their forever home.</div></li>
-          <li><span class="icon">🏠</span><div><strong>Safe Shelter</strong>Clean, comfortable foster homes and kennel care for animals in crisis.</div></li>
-        </ul>
-      </div>
-
-      <!-- Donate card -->
-      <div class="donate-card">
-        <div class="donate-card-head">
-          <h3>Make a Donation</h3>
-          <p>Hellena Animal Rescue · Houston, Texas</p>
-        </div>
-        <div class="donate-body">
-          <div class="freq-toggle">
-            <button class="freq-btn selected" onclick="setFreq('onetime', this)">One-time</button>
-            <button class="freq-btn" onclick="setFreq('monthly', this)">Monthly</button>
-          </div>
-          <p class="monthly-note" id="monthly-note">💛 Monthly gift — thank you for your ongoing support!</p>
-
-          <div class="donate-label">Choose an amount</div>
-          <div class="amount-presets">
-            <button class="amount-preset" data-val="25" onclick="setAmount(25, this)">$25</button>
-            <button class="amount-preset selected" data-val="50" onclick="setAmount(50, this)">$50</button>
-            <button class="amount-preset" data-val="100" onclick="setAmount(100, this)">$100</button>
-            <button class="amount-preset" data-val="250" onclick="setAmount(250, this)">$250</button>
-          </div>
-          <div class="donate-label">Or enter your own</div>
-          <div class="amount-row">
-            <span>$</span>
-            <input type="number" id="donate-amount" value="50" min="1" placeholder="e.g. 10, 50, 100" oninput="clearPresets()"/>
-          </div>
-          <div id="payment-container"></div>
-          <div class="secure-note">🔒 Secured by PayPal · No account needed</div>
-        </div>
-      </div>
-
-    </div>
+<div class="donate-card">
+  <div class="donate-card-head">
+    <h3>Make a Donation</h3>
+    <p>Hellena Animal Rescue · Houston, Texas · 501(c)(3)</p>
   </div>
-</section>
+  <div class="donate-body">
+    <div class="freq-toggle">
+      <button class="freq-btn selected" onclick="setFreq('onetime', this)">One-time</button>
+      <button class="freq-btn" onclick="setFreq('monthly', this)">Monthly</button>
+    </div>
+    <p class="monthly-note" id="monthly-note">💛 Monthly gift — thank you for your ongoing support!</p>
+    <div class="donate-label">Choose an amount</div>
+    <div class="amount-presets">
+      <button class="amount-preset" data-val="25" onclick="setAmount(25, this)">$25</button>
+      <button class="amount-preset selected" data-val="50" onclick="setAmount(50, this)">$50</button>
+      <button class="amount-preset" data-val="100" onclick="setAmount(100, this)">$100</button>
+      <button class="amount-preset" data-val="250" onclick="setAmount(250, this)">$250</button>
+    </div>
+    <div class="donate-label">Or enter your own</div>
+    <div class="amount-row">
+      <span>$</span>
+      <input type="number" id="donate-amount" value="50" min="1" placeholder="e.g. 10, 50, 100" oninput="clearPresets()"/>
+    </div>
+    <div id="payment-container"></div>
+    <div class="secure-note">🔒 Secured by PayPal · No account needed</div>
+  </div>
+</div>
+
+<div class="impact-strip">
+  <div class="impact-item"><span class="icon">🏥</span><strong>Vet Care</strong>Every animal treated</div>
+  <div class="impact-item"><span class="icon">🍖</span><strong>Food</strong>Quality nutrition daily</div>
+  <div class="impact-item"><span class="icon">🏠</span><strong>Shelter</strong>Safe foster homes</div>
+</div>
 
 <footer class="footer">
   <div class="footer-inner">
