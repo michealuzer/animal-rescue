@@ -16,201 +16,35 @@
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
-    /* ── TWO-PANEL LAYOUT ─────────────────────────────── */
-    .donate-page {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .donate-wrap {
       min-height: calc(100vh - 64px);
-    }
-
-    /* LEFT: photo panel */
-    .donate-photo {
-      position: relative;
-      overflow: hidden;
-      min-height: 600px;
-    }
-    .donate-photo > img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      object-position: center 30%;
-    }
-    .donate-photo-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to top,
-        rgba(19,29,17,0.92) 0%,
-        rgba(19,29,17,0.4) 50%,
-        rgba(19,29,17,0.15) 100%
-      );
-    }
-    .donate-photo-content {
-      position: absolute;
-      inset: 0;
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 44px 48px;
-      color: white;
-    }
-    .donate-photo-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--amber-bright);
-      margin-bottom: 16px;
-    }
-    .donate-photo-eyebrow::before,
-    .donate-photo-eyebrow::after {
-      content: '';
-      display: block;
-      width: 22px;
-      height: 1px;
-      background: var(--amber-bright);
-      opacity: 0.7;
-    }
-    .donate-photo-content h2 {
-      font-family: var(--font-display);
-      font-size: 2.8rem;
-      font-weight: 500;
-      line-height: 1.1;
-      margin-bottom: 20px;
-      letter-spacing: -0.01em;
-      max-width: 420px;
-    }
-    .donate-photo-content h2 em {
-      font-style: italic;
-      color: var(--amber-bright);
-    }
-    .donate-photo-stats {
-      display: flex;
-      gap: 32px;
-      padding-top: 24px;
-      border-top: 1px solid rgba(255,255,255,0.12);
-    }
-    .donate-photo-stat .num {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--amber-bright);
-      line-height: 1;
-      display: block;
-    }
-    .donate-photo-stat .lbl {
-      font-size: 0.68rem;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      opacity: 0.5;
-      margin-top: 4px;
-      display: block;
-    }
-
-    /* RIGHT: form panel */
-    .donate-form-panel {
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 56px 48px;
-      overflow-y: auto;
+      padding: 56px 24px;
+      background: var(--bg);
     }
-    .donate-form-inner {
+    .donate-box {
       width: 100%;
-      max-width: 380px;
+      max-width: 440px;
     }
-    .donate-form-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 12px;
-    }
-    .donate-form-eyebrow::before,
-    .donate-form-eyebrow::after {
-      content: '';
-      display: block;
-      width: 20px;
-      height: 1px;
-      background: var(--amber);
-      opacity: 0.55;
-    }
-    .donate-form-inner h1 {
+    .donate-box h1 {
       font-family: var(--font-display);
-      font-size: 2.3rem;
+      font-size: 2.4rem;
       font-weight: 600;
       color: var(--text);
       line-height: 1.12;
       margin-bottom: 8px;
       letter-spacing: -0.01em;
     }
-    .donate-form-inner h1 em {
-      font-style: italic;
-      color: var(--forest);
-    }
-    .donate-form-sub {
-      font-size: 0.875rem;
+    .donate-box h1 em { font-style: italic; color: var(--forest); }
+    .donate-sub {
+      font-size: 0.9rem;
       color: var(--text-muted);
-      margin-bottom: 28px;
+      margin-bottom: 36px;
       line-height: 1.7;
-      font-weight: 400;
     }
 
-    /* Progress */
-    .donate-progress {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 18px;
-      margin-bottom: 26px;
-    }
-    .donate-progress-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 10px;
-    }
-    .donate-progress-raised {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1;
-    }
-    .donate-progress-goal {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-    .donate-progress-bar-bg {
-      background: var(--bg-section);
-      border-radius: 99px;
-      height: 5px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .donate-progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--amber), var(--amber-light));
-      border-radius: 99px;
-      width: 0;
-      transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
-    }
-    .donate-progress-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.71rem;
-      color: var(--text-muted);
-    }
-
-    /* Amount */
     .donate-section-label {
       font-size: 0.68rem;
       font-weight: 700;
@@ -226,7 +60,7 @@
       margin-bottom: 10px;
     }
     .amount-preset {
-      padding: 12px 6px;
+      padding: 13px 6px;
       border: 1.5px solid var(--border-mid);
       border-radius: 8px;
       background: white;
@@ -254,13 +88,13 @@
       border: 1.5px solid var(--border-mid);
       border-radius: 8px;
       overflow: hidden;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       background: white;
       transition: border-color 0.18s;
     }
     .amount-row:focus-within { border-color: var(--forest); }
     .amount-row .prefix {
-      padding: 12px 15px;
+      padding: 13px 15px;
       background: var(--bg-section);
       color: var(--text-muted);
       font-weight: 700;
@@ -271,7 +105,7 @@
     .amount-row input {
       border: none;
       outline: none;
-      padding: 12px 14px;
+      padding: 13px 14px;
       font-size: 0.95rem;
       font-family: var(--font);
       width: 100%;
@@ -279,27 +113,25 @@
       background: white;
     }
 
-    /* Payment */
-    #payment-container { margin-bottom: 2px; }
+    #payment-container { margin-bottom: 4px; }
     .secure-note {
       text-align: center;
       font-size: 0.71rem;
       color: var(--text-muted);
-      margin-top: 8px;
+      margin-top: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 5px;
-      opacity: 0.65;
+      opacity: 0.6;
     }
 
-    /* Trust signals */
     .donate-trust {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      margin-top: 22px;
-      padding-top: 20px;
+      margin-top: 24px;
+      padding-top: 22px;
       border-top: 1px solid var(--border);
     }
     .trust-item {
@@ -308,11 +140,9 @@
       gap: 10px;
       font-size: 0.82rem;
       color: var(--text-muted);
-      font-weight: 400;
     }
     .trust-check {
-      width: 16px;
-      height: 16px;
+      width: 16px; height: 16px;
       border-radius: 50%;
       background: var(--forest-pale);
       border: 1px solid var(--forest-light);
@@ -321,63 +151,11 @@
       justify-content: center;
       flex-shrink: 0;
     }
-    .trust-check svg { display: block; }
 
-    /* Impact strip */
-    .impact-strip {
-      background: var(--forest-dark);
-      padding: 40px 24px;
-    }
-    .impact-strip-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-    .impact-item {
-      text-align: center;
-      color: white;
-      padding: 28px 20px;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.03);
-      transition: background 0.2s;
-    }
-    .impact-item:hover { background: rgba(255,255,255,0.06); }
-    .impact-item .icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
-    .impact-item strong {
-      display: block;
-      font-family: var(--font-display);
-      font-size: 1.15rem;
-      font-weight: 500;
-      color: var(--amber-bright);
-      margin-bottom: 6px;
-    }
-    .impact-item span {
-      font-size: 0.78rem;
-      opacity: 0.48;
-      line-height: 1.6;
-      display: block;
-    }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      .donate-page { grid-template-columns: 1fr; }
-      .donate-photo { min-height: 380px; }
-      .donate-photo-content { padding: 28px 28px; }
-      .donate-photo-content h2 { font-size: 2.2rem; }
-      .donate-form-panel { padding: 44px 28px; }
-    }
     @media (max-width: 480px) {
-      .donate-photo { min-height: 300px; }
-      .donate-photo-content { padding: 20px 20px; }
-      .donate-photo-content h2 { font-size: 1.8rem; }
-      .donate-form-panel { padding: 32px 16px; }
-      .donate-form-inner h1 { font-size: 1.9rem; }
+      .donate-wrap { padding: 36px 16px; align-items: flex-start; }
+      .donate-box h1 { font-size: 2rem; }
       .amount-presets { grid-template-columns: repeat(2, 1fr); }
-      .impact-strip-inner { grid-template-columns: 1fr; gap: 10px; }
-      .donate-photo-stats { gap: 20px; }
     }
   </style>
 </head>
@@ -397,115 +175,47 @@
   </div>
 </nav>
 
-<div class="donate-page">
+<div class="donate-wrap">
+  <div class="donate-box">
 
-  <!-- LEFT: Photo + caption -->
-  <div class="donate-photo">
-    <img src="dogs.jpg" alt="Rescue dogs at Hellena Animal Rescue"/>
-    <div class="donate-photo-overlay"></div>
-    <div class="donate-photo-content">
-      <div class="donate-photo-eyebrow">Hellena Animal Rescue</div>
-      <h2>Every dollar goes <em>directly</em> to the animals.</h2>
-      <div class="donate-photo-stats">
-        <div class="donate-photo-stat">
-          <span class="num" id="stat-donors">—</span>
-          <span class="lbl">Donors</span>
-        </div>
-        <div class="donate-photo-stat">
-          <span class="num" id="stat-raised-photo">—</span>
-          <span class="lbl">Raised</span>
-        </div>
-        <div class="donate-photo-stat">
-          <span class="num">100%</span>
-          <span class="lbl">To Animals</span>
-        </div>
+    <h1>Support Our <em>Rescue Mission</em></h1>
+    <p class="donate-sub">100% volunteer-run. Every dollar goes directly to vet care, food, and shelter for the animals.</p>
+
+    <div class="donate-section-label">Choose an amount</div>
+    <div class="amount-presets">
+      <button class="amount-preset" onclick="setAmount(25, this)">$25</button>
+      <button class="amount-preset selected" onclick="setAmount(50, this)">$50</button>
+      <button class="amount-preset" onclick="setAmount(100, this)">$100</button>
+      <button class="amount-preset" onclick="setAmount(250, this)">$250</button>
+    </div>
+
+    <div class="donate-section-label" style="margin-top:10px;">Or enter your own</div>
+    <div class="amount-row">
+      <span class="prefix">$</span>
+      <input type="number" id="donate-amount" value="50" min="1" placeholder="Other amount" oninput="clearPresets()"/>
+    </div>
+
+    <div id="payment-container"></div>
+    <div class="secure-note">
+      <svg width="11" height="13" viewBox="0 0 11 13" fill="none"><rect x="1" y="5" width="9" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Secured by PayPal &middot; No account needed
+    </div>
+
+    <div class="donate-trust">
+      <div class="trust-item">
+        <span class="trust-check"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="#2c5c3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        100% of donations reach the animals
+      </div>
+      <div class="trust-item">
+        <span class="trust-check"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="#2c5c3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        Registered 501(c)(3) &mdash; tax deductible
+      </div>
+      <div class="trust-item">
+        <span class="trust-check"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="#2c5c3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        No admin fees &middot; entirely volunteer-run
       </div>
     </div>
-  </div>
 
-  <!-- RIGHT: Donation form -->
-  <div class="donate-form-panel">
-    <div class="donate-form-inner">
-
-      <div class="donate-form-eyebrow">Make a Donation</div>
-      <h1>Give a rescue animal a <em>fighting chance.</em></h1>
-      <p class="donate-form-sub">We are 100% volunteer-run. No admin fees — every dollar reaches the animals in our care.</p>
-
-      <!-- Progress bar -->
-      <div class="donate-progress">
-        <div class="donate-progress-top">
-          <span class="donate-progress-raised" id="raised-text">Loading&hellip;</span>
-          <span class="donate-progress-goal">of $5,000 goal</span>
-        </div>
-        <div class="donate-progress-bar-bg">
-          <div class="donate-progress-bar-fill" id="bar"></div>
-        </div>
-        <div class="donate-progress-meta">
-          <span id="donor-count-label">0 donors</span>
-          <span id="pct-label">0% funded</span>
-        </div>
-      </div>
-
-      <!-- Amount selection -->
-      <div class="donate-section-label">Choose an amount</div>
-      <div class="amount-presets">
-        <button class="amount-preset" onclick="setAmount(25, this)">$25</button>
-        <button class="amount-preset selected" onclick="setAmount(50, this)">$50</button>
-        <button class="amount-preset" onclick="setAmount(100, this)">$100</button>
-        <button class="amount-preset" onclick="setAmount(250, this)">$250</button>
-      </div>
-
-      <div class="donate-section-label" style="margin-top:8px;">Or enter your own</div>
-      <div class="amount-row">
-        <span class="prefix">$</span>
-        <input type="number" id="donate-amount" value="50" min="1" placeholder="Other amount" oninput="clearPresets()"/>
-      </div>
-
-      <div id="payment-container"></div>
-      <div class="secure-note">
-        <svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="5" width="9" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Secured by PayPal &middot; No account needed
-      </div>
-
-      <!-- Trust signals -->
-      <div class="donate-trust">
-        <div class="trust-item">
-          <span class="trust-check"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="#2c5c3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          100% of donations reach the animals
-        </div>
-        <div class="trust-item">
-          <span class="trust-check"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="#2c5c3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          Registered 501(c)(3) &mdash; tax deductible
-        </div>
-        <div class="trust-item">
-          <span class="trust-check"><svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="#2c5c3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          No admin fees &middot; entirely volunteer-run
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-<!-- Impact strip -->
-<div class="impact-strip">
-  <div class="impact-strip-inner">
-    <div class="impact-item">
-      <span class="icon">🏥</span>
-      <strong>Vet Care</strong>
-      <span>Every animal treated and vaccinated before adoption</span>
-    </div>
-    <div class="impact-item">
-      <span class="icon">🍖</span>
-      <strong>Food &amp; Nutrition</strong>
-      <span>Quality meals and proper nutrition every single day</span>
-    </div>
-    <div class="impact-item">
-      <span class="icon">🏠</span>
-      <strong>Safe Shelter</strong>
-      <span>Foster homes and kennel care while they wait</span>
-    </div>
   </div>
 </div>
 
@@ -532,36 +242,11 @@
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
   }
 
-  async function loadStats() {
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/donation_stats?id=eq.1', { headers: SUPABASE_HEADERS });
-      const [s] = await res.json();
-      if (!s) return;
-      const pct = Math.min((s.total_raised / DONATION_GOAL) * 100, 100);
-      setTimeout(() => {
-        document.getElementById('bar').style.width = pct + '%';
-      }, 200);
-      const raised = '$' + parseFloat(s.total_raised).toLocaleString();
-      document.getElementById('raised-text').textContent = raised;
-      document.getElementById('pct-label').textContent = Math.round(pct) + '% funded';
-      document.getElementById('donor-count-label').textContent = s.donor_count + ' donors';
-      const raisedPhoto = document.getElementById('stat-raised-photo');
-      const donorsPhoto = document.getElementById('stat-donors');
-      if (raisedPhoto) raisedPhoto.textContent = raised;
-      if (donorsPhoto) donorsPhoto.textContent = s.donor_count;
-    } catch(e) {
-      document.getElementById('raised-text').textContent = '$0';
-    }
-  }
-
-  loadStats();
-
   Payment.render('payment-container', {
     getAmount: () => document.getElementById('donate-amount').value || '50',
     description: 'Animal Rescue Donation – Hellena Animal Rescue',
     fundraiserId: null,
     onSuccess({ amount, payerName }) {
-      loadStats();
       alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your donation means the world to our animals. 🐾');
     },
     onError() { alert('Something went wrong. Please try again.'); },

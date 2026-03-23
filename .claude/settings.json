@@ -9,7 +9,8 @@
       "Bash(curl -s -H \"Authorization: Bearer nfp_McsUZrkFEFFNTZocHDZb68DBheeeJaxJ8fdd\" \"https://api.netlify.com/api/v1/sites?filter=all\")",
       "Bash(python3 -c \"import sys,json; sites=json.load\\(sys.stdin\\); [print\\(s[''''id''''], s[''''name''''], s.get\\(''''url'''',''''''''\\)\\) for s in sites]\")",
       "Bash(curl -s -X POST -H \"Authorization: Bearer nfp_McsUZrkFEFFNTZocHDZb68DBheeeJaxJ8fdd\" \"https://api.netlify.com/api/v1/sites/385eab94-ca2c-41ed-8d18-beafe7beb6fc/builds\")",
-      "Bash(python3 -c \"import sys,json; r=json.load\\(sys.stdin\\); print\\(''''Build ID:'''', r.get\\(''''id''''\\)\\); print\\(''''State:'''', r.get\\(''''state''''\\)\\); print\\(''''Deploy ID:'''', r.get\\(''''deploy_id'''',''''''''\\)\\)\")"
+      "Bash(python3 -c \"import sys,json; r=json.load\\(sys.stdin\\); print\\(''''Build ID:'''', r.get\\(''''id''''\\)\\); print\\(''''State:'''', r.get\\(''''state''''\\)\\); print\\(''''Deploy ID:'''', r.get\\(''''deploy_id'''',''''''''\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; r=json.load\\(sys.stdin\\); print\\(''''Build triggered:'''', r.get\\(''''id''''\\)\\)\")"
     ]
   },
   "enabledMcpjsonServers": [
