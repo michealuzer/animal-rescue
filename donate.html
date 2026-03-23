@@ -21,32 +21,38 @@
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
-    .donate-card { background: white; border-radius: var(--radius-lg); max-width: 480px; margin: 0 auto; overflow: hidden; box-shadow: var(--shadow-lg); }
-    .donate-card-banner { position: relative; height: 240px; background: linear-gradient(135deg, #4a7c59, #6baf82); overflow: hidden; }
-    .donate-card-banner img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
-    .donate-card-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%); }
-    .donate-banner-text { position: absolute; bottom: 18px; left: 22px; z-index: 2; color: white; }
-    .donate-banner-text h2 { font-size: 1.3rem; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-    .donate-banner-text p { font-size: 0.82rem; opacity: 0.85; margin-top: 3px; }
-    .donate-body { padding: 28px; }
-    .donate-label { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 10px; }
+    .donate-layout { display: flex; gap: 56px; align-items: flex-start; max-width: 900px; margin: 0 auto; }
+    .donate-copy { flex: 1; min-width: 0; }
+    .donate-copy h2 { font-size: 1.7rem; font-weight: 800; color: var(--brown-dark); margin-bottom: 14px; line-height: 1.3; }
+    .donate-copy p { font-size: 0.97rem; color: var(--text-muted); line-height: 1.85; margin-bottom: 16px; }
+    .donate-copy .impact-list { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-direction: column; gap: 12px; }
+    .donate-copy .impact-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.93rem; color: var(--text); }
+    .donate-copy .impact-list li .icon { font-size: 1.2rem; line-height: 1; margin-top: 1px; flex-shrink: 0; }
+    .donate-copy .impact-list li strong { display: block; font-weight: 700; color: var(--brown-dark); }
+    .donate-card { width: 340px; flex-shrink: 0; background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
+    .donate-card-head { background: linear-gradient(135deg, #4a7c59, #6baf82); padding: 22px 24px 20px; color: white; }
+    .donate-card-head h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+    .donate-card-head p { font-size: 0.82rem; opacity: 0.85; }
+    .donate-body { padding: 24px; }
+    .donate-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 10px; }
+    .freq-toggle { display: flex; border: 2px solid var(--border-mid); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
+    .freq-btn { flex: 1; padding: 10px; border: none; background: white; font-family: var(--font); font-weight: 700; font-size: 0.88rem; color: var(--brown-mid); cursor: pointer; transition: all 0.2s; }
+    .freq-btn.selected { background: var(--green); color: white; }
+    .freq-btn:hover:not(.selected) { background: var(--bg-section); }
+    .monthly-note { font-size: 0.8rem; color: var(--green); font-weight: 600; margin-bottom: 14px; display: none; }
+    .monthly-note.visible { display: block; }
     .amount-presets { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-    .amount-preset { padding: 8px 16px; border: 2px solid var(--border-mid); border-radius: var(--radius); background: white; font-family: var(--font); font-weight: 700; font-size: 0.9rem; color: var(--brown-mid); cursor: pointer; transition: all 0.2s; }
+    .amount-preset { padding: 8px 14px; border: 2px solid var(--border-mid); border-radius: var(--radius); background: white; font-family: var(--font); font-weight: 700; font-size: 0.88rem; color: var(--brown-mid); cursor: pointer; transition: all 0.2s; }
     .amount-preset:hover, .amount-preset.selected { border-color: var(--gold); background: var(--gold-pale); color: var(--brown-dark); }
     .amount-row { display: flex; align-items: center; border: 2px solid var(--border-mid); border-radius: var(--radius); overflow: hidden; margin-bottom: 18px; background: white; }
     .amount-row:focus-within { border-color: var(--green); }
     .amount-row span { padding: 11px 14px; background: var(--bg-section); color: var(--brown-light); font-weight: 800; font-size: 1rem; border-right: 2px solid var(--border-mid); }
     .amount-row input { border: none; outline: none; padding: 11px 14px; font-size: 1rem; font-family: var(--font); width: 100%; color: var(--text); background: white; }
     .secure-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; }
-    .donate-footer { background: var(--bg-section); border-top: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap; gap: 6px; }
-    .donate-footer strong { color: var(--brown); }
-    /* Frequency toggle */
-    .freq-toggle { display: flex; border: 2px solid var(--border-mid); border-radius: var(--radius); overflow: hidden; margin-bottom: 22px; }
-    .freq-btn { flex: 1; padding: 11px 10px; border: none; background: white; font-family: var(--font); font-weight: 700; font-size: 0.9rem; color: var(--brown-mid); cursor: pointer; transition: all 0.2s; line-height: 1; }
-    .freq-btn.selected { background: var(--green); color: white; }
-    .freq-btn:hover:not(.selected) { background: var(--bg-section); }
-    .monthly-note { font-size: 0.8rem; color: var(--green); font-weight: 600; margin-bottom: 14px; display: none; }
-    .monthly-note.visible { display: block; }
+    @media (max-width: 720px) {
+      .donate-layout { flex-direction: column; }
+      .donate-card { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -66,70 +72,57 @@
 </nav>
 
 <div class="page-hero">
-  <h1>Your Donation Makes a Difference</h1>
-  <p>Please support us in our fight to end animal suffering and reduce the number of animals euthanized in shelters every day. 100% of donations go to helping animals.</p>
+  <h1>Support Our Animals</h1>
+  <p>Every dollar goes directly to the animals in our care — no admin fees, no overhead. Just love and medicine.</p>
 </div>
 
 <section class="section">
   <div class="section-inner">
-    <div class="donate-card">
-      <div class="donate-card-banner">
-        <img src="dogs.jpg" alt="Rescue dogs"/>
-        <div class="donate-banner-text">
-          <h2>Help Us Rescue Animals 🏡</h2>
+    <div class="donate-layout">
+
+      <!-- Copy -->
+      <div class="donate-copy">
+        <h2>We run entirely on community support.</h2>
+        <p>Hellena Animal Rescue is a 100% volunteer-run organization based in Houston, Texas. We rescue dogs and cats from shelters, streets, and crisis situations — providing medical care, safe foster homes, and love until they find their forever family.</p>
+        <p>We receive no government funding. Everything we do is made possible by people like you. Your donation — whether one-time or monthly — directly funds the animals in our care right now.</p>
+        <p>Donations are tax deductible. We are a registered 501(c)(3) tax exempt charity.</p>
+        <ul class="impact-list">
+          <li><span class="icon">🏥</span><div><strong>Veterinary Care</strong>Exams, vaccinations, spay/neuter, and emergency treatment for every animal before adoption.</div></li>
+          <li><span class="icon">🍖</span><div><strong>Food &amp; Nutrition</strong>Quality food and supplements to keep animals healthy while they wait for their forever home.</div></li>
+          <li><span class="icon">🏠</span><div><strong>Safe Shelter</strong>Clean, comfortable foster homes and kennel care for animals in crisis.</div></li>
+        </ul>
+      </div>
+
+      <!-- Donate card -->
+      <div class="donate-card">
+        <div class="donate-card-head">
+          <h3>Make a Donation</h3>
           <p>Hellena Animal Rescue · Houston, Texas</p>
         </div>
-      </div>
-      <div class="donate-body">
-        <div class="progress-bar-bg" style="margin-bottom:8px;"><div class="progress-bar-fill" id="bar"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:20px;">
-          <span style="font-weight:800;color:var(--brown-dark);" id="raised-text">$0 raised</span>
-          <span style="color:var(--text-muted);">Goal: $5,000</span>
-        </div>
-        <hr style="border:none;border-top:1px solid var(--border);margin-bottom:20px;"/>
+        <div class="donate-body">
+          <div class="freq-toggle">
+            <button class="freq-btn selected" onclick="setFreq('onetime', this)">One-time</button>
+            <button class="freq-btn" onclick="setFreq('monthly', this)">Monthly</button>
+          </div>
+          <p class="monthly-note" id="monthly-note">💛 Monthly gift — thank you for your ongoing support!</p>
 
-        <!-- Frequency toggle -->
-        <div class="freq-toggle">
-          <button class="freq-btn selected" id="btn-onetime" onclick="setFreq('onetime', this)">One-time</button>
-          <button class="freq-btn" id="btn-monthly" onclick="setFreq('monthly', this)">Monthly</button>
+          <div class="donate-label">Choose an amount</div>
+          <div class="amount-presets">
+            <button class="amount-preset" data-val="25" onclick="setAmount(25, this)">$25</button>
+            <button class="amount-preset selected" data-val="50" onclick="setAmount(50, this)">$50</button>
+            <button class="amount-preset" data-val="100" onclick="setAmount(100, this)">$100</button>
+            <button class="amount-preset" data-val="250" onclick="setAmount(250, this)">$250</button>
+          </div>
+          <div class="donate-label">Or enter your own</div>
+          <div class="amount-row">
+            <span>$</span>
+            <input type="number" id="donate-amount" value="50" min="1" placeholder="e.g. 10, 50, 100" oninput="clearPresets()"/>
+          </div>
+          <div id="payment-container"></div>
+          <div class="secure-note">🔒 Secured by PayPal · No account needed</div>
         </div>
-        <p class="monthly-note" id="monthly-note">💛 You're setting up a monthly gift — thank you for your ongoing support!</p>
-
-        <div class="donate-label">Choose an amount</div>
-        <div class="amount-presets">
-          <button class="amount-preset" data-val="25" onclick="setAmount(25, this)">$25</button>
-          <button class="amount-preset selected" data-val="50" onclick="setAmount(50, this)">$50</button>
-          <button class="amount-preset" data-val="100" onclick="setAmount(100, this)">$100</button>
-          <button class="amount-preset" data-val="250" onclick="setAmount(250, this)">$250</button>
-        </div>
-        <div class="donate-label">Or enter your own</div>
-        <div class="amount-row">
-          <span>$</span>
-          <input type="number" id="donate-amount" value="50" min="1" placeholder="e.g. 10, 50, 100" oninput="clearPresets()"/>
-        </div>
-        <div id="payment-container"></div>
-        <div class="secure-note">🔒 Secured by PayPal · No account needed</div>
       </div>
-      <div class="donate-footer">
-        <span>👥 <strong id="donor-count">0</strong> donors</span>
-        <span>💛 <strong id="raised-footer">$0</strong> raised</span>
-        <span>🎯 <strong>$5,000</strong> goal</span>
-      </div>
-    </div>
-  </div>
-</section>
 
-<section class="section section-alt">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-eyebrow">Your Impact</div>
-      <h2>Where Your Money Goes</h2>
-      <p>Every dollar goes directly to providing care for our animals. Donations are tax deductible — we are a 501(c)(3) tax exempt charity.</p>
-    </div>
-    <div class="steps-grid">
-      <div class="step-card"><div class="step-icon">🏥</div><h3>Veterinary Care</h3><p>Exams, vaccinations, spay/neuter, and emergency treatments for every rescued animal before adoption.</p></div>
-      <div class="step-card"><div class="step-icon">🍖</div><h3>Food &amp; Nutrition</h3><p>Quality food and supplements to keep our rescue animals healthy and thriving while they wait for their forever home.</p></div>
-      <div class="step-card"><div class="step-icon">🏠</div><h3>Safe Shelter</h3><p>Clean, comfortable foster homes and kennel care for animals in crisis — because every animal deserves safety.</p></div>
     </div>
   </div>
 </section>
@@ -153,12 +146,9 @@
     isMonthly = type === 'monthly';
     document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
-    const note = document.getElementById('monthly-note');
-    note.classList.toggle('visible', isMonthly);
-    // Update preset labels
+    document.getElementById('monthly-note').classList.toggle('visible', isMonthly);
     document.querySelectorAll('.amount-preset').forEach(b => {
-      const val = b.getAttribute('data-val');
-      b.textContent = '$' + val + (isMonthly ? '/mo' : '');
+      b.textContent = '$' + b.getAttribute('data-val') + (isMonthly ? '/mo' : '');
     });
   }
 
@@ -172,28 +162,12 @@
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
   }
 
-  async function loadStats() {
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/donation_stats?id=eq.1', { headers: SUPABASE_HEADERS });
-      const [s] = await res.json();
-      if (!s) return;
-      const pct = Math.min((s.total_raised / DONATION_GOAL) * 100, 100);
-      document.getElementById('bar').style.width = pct + '%';
-      document.getElementById('raised-text').textContent = '$' + parseFloat(s.total_raised).toLocaleString() + ' raised';
-      document.getElementById('raised-footer').textContent = '$' + parseFloat(s.total_raised).toLocaleString();
-      document.getElementById('donor-count').textContent = s.donor_count;
-    } catch(e) {}
-  }
-
-  loadStats();
-
   Payment.render('payment-container', {
     getAmount: () => document.getElementById('donate-amount').value || '50',
     getIsRecurring: () => isMonthly,
     description: 'Animal Rescue Donation – Hellena Animal Rescue',
     fundraiserId: null,
     onSuccess({ amount, payerName }) {
-      loadStats();
       const type = isMonthly ? 'monthly ' : '';
       alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your ' + type + 'donation means the world to our animals. 🐾');
     },
