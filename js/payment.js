@@ -55,7 +55,6 @@ async function recordDonation({ amount, fundraiserId = null, payerName = null, p
 const PayPalProvider = {
   render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
     paypal.Buttons({
-      fundingSource: paypal.FUNDING.PAYPAL,
       style: {
         label: 'donate',
       },
