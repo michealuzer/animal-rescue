@@ -16,7 +16,6 @@
   <script src="js/config.js"></script>
   <script src="js/payment.js"></script>
   <style>
-    /* ── Donate hero ─────────────────────────────────────── */
     .donate-hero {
       position: relative;
       min-height: calc(100vh - 64px);
@@ -51,8 +50,6 @@
       gap: 56px;
       align-items: center;
     }
-
-    /* ── Left copy ───────────────────────────────────────── */
     .donate-copy { color: white; }
     .donate-copy .eyebrow {
       display: inline-flex;
@@ -100,8 +97,6 @@
       background: var(--gold);
       flex-shrink: 0;
     }
-
-    /* ── Donate card ─────────────────────────────────────── */
     .donate-card {
       background: white;
       border-radius: 20px;
@@ -115,8 +110,6 @@
     .donate-card-head h3 { font-size: 1.05rem; font-weight: 800; color: white; margin-bottom: 2px; }
     .donate-card-head p { font-size: 0.78rem; color: rgba(255,255,255,0.72); }
     .donate-body { padding: 20px 24px 22px; }
-
-    /* Progress */
     .donate-progress { margin-bottom: 18px; }
     .donate-progress-bar-bg {
       background: var(--brown-pale);
@@ -137,53 +130,8 @@
       justify-content: space-between;
       font-size: 0.82rem;
     }
-    .donate-progress-meta .raised {
-      font-weight: 800;
-      color: var(--brown-dark);
-    }
+    .donate-progress-meta .raised { font-weight: 800; color: var(--brown-dark); }
     .donate-progress-meta .goal { color: var(--text-muted); }
-
-    /* Frequency toggle */
-    .freq-toggle {
-      display: flex;
-      background: var(--bg-section);
-      border-radius: 10px;
-      padding: 4px;
-      margin-bottom: 18px;
-      gap: 4px;
-    }
-    .freq-btn {
-      flex: 1;
-      padding: 9px 10px;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      font-family: var(--font);
-      font-weight: 700;
-      font-size: 0.87rem;
-      color: var(--brown-light);
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-    .freq-btn.selected {
-      background: white;
-      color: var(--green-dark);
-      box-shadow: 0 1px 6px rgba(0,0,0,0.12);
-    }
-    .monthly-note {
-      background: #f0faf4;
-      border: 1px solid #c3e6cb;
-      color: var(--green-dark);
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-bottom: 14px;
-      display: none;
-    }
-    .monthly-note.visible { display: block; }
-
-    /* Amount presets */
     .donate-label {
       font-size: 0.7rem;
       font-weight: 700;
@@ -212,11 +160,7 @@
       text-align: center;
     }
     .amount-preset:hover { border-color: var(--green); color: var(--green-dark); }
-    .amount-preset.selected {
-      border-color: var(--green);
-      background: #f0faf4;
-      color: var(--green-dark);
-    }
+    .amount-preset.selected { border-color: var(--green); background: #f0faf4; color: var(--green-dark); }
     .amount-row {
       display: flex;
       align-items: center;
@@ -258,8 +202,6 @@
       justify-content: center;
       gap: 5px;
     }
-
-    /* Card footer stats */
     .donate-card-footer {
       background: var(--bg-section);
       border-top: 1px solid var(--border);
@@ -270,8 +212,6 @@
       color: var(--text-muted);
     }
     .donate-card-footer strong { color: var(--brown); font-weight: 700; }
-
-    /* ── Impact strip ────────────────────────────────────── */
     .impact-strip { background: var(--brown-dark); padding: 28px 24px; }
     .impact-strip-inner {
       max-width: 1100px;
@@ -285,8 +225,6 @@
     .impact-item .icon { font-size: 1.5rem; margin-bottom: 5px; }
     .impact-item strong { display: block; font-size: 0.88rem; font-weight: 800; color: var(--gold-light); margin-bottom: 2px; }
     .impact-item span { font-size: 0.78rem; opacity: 0.55; }
-
-    /* ── Responsive ──────────────────────────────────────── */
     @media (max-width: 860px) {
       .donate-hero { min-height: unset; }
       .donate-hero-overlay { background: linear-gradient(to bottom, rgba(10,6,3,0.65) 0%, rgba(10,6,3,0.82) 100%); }
@@ -341,8 +279,6 @@
         <p>One-time or monthly &mdash; every amount helps</p>
       </div>
       <div class="donate-body">
-
-        <!-- Progress -->
         <div class="donate-progress">
           <div class="donate-progress-bar-bg">
             <div class="donate-progress-bar-fill" id="bar"></div>
@@ -352,12 +288,6 @@
             <span class="goal">Goal: $5,000</span>
           </div>
         </div>
-
-        <div class="freq-toggle">
-          <button class="freq-btn selected" onclick="setFreq('onetime', this)">One-time</button>
-          <button class="freq-btn" onclick="setFreq('monthly', this)">Monthly</button>
-        </div>
-        <p class="monthly-note" id="monthly-note">💛 You're setting up a monthly gift &mdash; thank you!</p>
 
         <div class="donate-label">Select an amount</div>
         <div class="amount-presets">
@@ -379,7 +309,6 @@
           Secured by PayPal &middot; No account needed
         </div>
       </div>
-
       <div class="donate-card-footer">
         <span>👥 <strong id="donor-count">0</strong> donors</span>
         <span>💛 <strong id="raised-footer">$0</strong> raised</span>
@@ -411,18 +340,6 @@
 </footer>
 
 <script>
-  let isMonthly = false;
-
-  function setFreq(type, btn) {
-    isMonthly = type === 'monthly';
-    document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    document.getElementById('monthly-note').classList.toggle('visible', isMonthly);
-    document.querySelectorAll('.amount-preset').forEach(b => {
-      b.textContent = '$' + b.getAttribute('data-val') + (isMonthly ? '/mo' : '');
-    });
-  }
-
   function setAmount(val, btn) {
     document.getElementById('donate-amount').value = val;
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
@@ -452,13 +369,11 @@
 
   Payment.render('payment-container', {
     getAmount: () => document.getElementById('donate-amount').value || '50',
-    getIsRecurring: () => isMonthly,
     description: 'Animal Rescue Donation – Hellena Animal Rescue',
     fundraiserId: null,
     onSuccess({ amount, payerName }) {
       loadStats();
-      const type = isMonthly ? 'monthly ' : '';
-      alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your ' + type + 'donation means the world to our animals. 🐾');
+      alert('Thank you' + (payerName ? ', ' + payerName.split(' ')[0] : '') + '! Your donation means the world to our animals. 🐾');
     },
     onError() { alert('Something went wrong. Please try again.'); },
   });

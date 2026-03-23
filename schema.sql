@@ -76,7 +76,6 @@ create table if not exists donations (
   payer_email text,
   provider text default 'paypal' check (provider in ('paypal', 'stripe')),
   status text default 'completed' check (status in ('completed', 'refunded', 'failed')),
-  is_recurring boolean default false,
   created_at timestamptz default now()
 );
 

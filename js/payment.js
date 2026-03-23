@@ -9,7 +9,7 @@ const ACTIVE_PROVIDER = 'paypal'; // 'paypal' | 'stripe'
 
 // ── Supabase helpers ──────────────────────────────────────────
 
-async function recordDonation({ amount, fundraiserId = null, payerName = null, payerEmail = null, provider, isRecurring = false }) {
+async function recordDonation({ amount, fundraiserId = null, payerName = null, payerEmail = null, provider }) {
   try {
     await fetch(SUPABASE_URL + '/rest/v1/donations', {
       method: 'POST',
@@ -21,7 +21,6 @@ async function recordDonation({ amount, fundraiserId = null, payerName = null, p
         payer_email: payerEmail,
         provider,
         status: 'completed',
-        is_recurring: isRecurring,
       }),
     });
 
@@ -54,16 +53,15 @@ async function recordDonation({ amount, fundraiserId = null, payerName = null, p
 // ── PayPal provider ───────────────────────────────────────────
 
 const PayPalProvider = {
-  render(containerId, { getAmount, getIsRecurring = () => false, description, fundraiserId = null, onSuccess, onError }) {
+  render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
     paypal.Buttons({
       style: {
         label: 'donate',
       },
       createOrder(data, actions) {
-        const recurring = getIsRecurring();
         return actions.order.create({
           purchase_units: [{
-            description: recurring ? description + ' (Monthly)' : description,
+            description,
             amount: { value: parseFloat(getAmount() || 25).toFixed(2) },
           }],
         });
@@ -75,8 +73,7 @@ const PayPalProvider = {
             ? `${details.payer.name.given_name} ${details.payer.name.surname}`
             : null;
           const payerEmail = details.payer?.email_address || null;
-          const isRecurring = getIsRecurring();
-          await recordDonation({ amount, fundraiserId, payerName, payerEmail, provider: 'paypal', isRecurring });
+          await recordDonation({ amount, fundraiserId, payerName, payerEmail, provider: 'paypal' });
           onSuccess({ amount, payerName, payerEmail });
         });
       },
@@ -88,7 +85,7 @@ const PayPalProvider = {
 // ── Stripe provider ───────────────────────────────────────────
 
 const StripeProvider = {
-  render(containerId, { getAmount, getIsRecurring = () => false, description, fundraiserId = null, onSuccess, onError }) {
+  render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
     const elements = stripe.elements();
     const card = elements.create('card', {
@@ -165,8 +162,7 @@ const StripeProvider = {
           submitBtn.textContent = '💛 Donate with Card';
           onError(result.error);
         } else {
-          const isRecurring = getIsRecurring();
-          await recordDonation({ amount, fundraiserId, provider: 'stripe', isRecurring });
+          await recordDonation({ amount, fundraiserId, provider: 'stripe' });
           onSuccess({ amount, payerName: null });
         }
       } catch (e) {
