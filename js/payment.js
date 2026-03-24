@@ -5,7 +5,7 @@
 // To switch to Stripe: change ACTIVE_PROVIDER to 'stripe'
 // ─────────────────────────────────────────────────────────────
 
-const ACTIVE_PROVIDER = 'paypal'; // 'paypal' | 'stripe'
+const ACTIVE_PROVIDER = 'stripe'; // 'paypal' | 'stripe'
 
 // ── Supabase helpers ──────────────────────────────────────────
 
@@ -91,7 +91,7 @@ const StripeProvider = {
     const card = elements.create('card', {
       style: {
         base: {
-          fontFamily: "'Nunito', sans-serif",
+          fontFamily: "'DM Sans', sans-serif",
           fontSize: '15px',
           color: '#3d2b1f',
           '::placeholder': { color: '#b0957a' },
@@ -106,7 +106,7 @@ const StripeProvider = {
         <div id="stripe-card-${containerId}"></div>
       </div>
       <div id="stripe-error-${containerId}" style="display:none;color:#e53e3e;font-size:0.82rem;margin-bottom:10px;"></div>
-      <button id="stripe-submit-${containerId}" style="width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s;">
+      <button id="stripe-submit-${containerId}" style="width:100%;padding:12px;background:var(--forest);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s;">
         💛 Donate with Card
       </button>
       <div style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">🔒 Secured by Stripe</div>
