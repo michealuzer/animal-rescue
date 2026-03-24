@@ -198,7 +198,7 @@
     <div id="payment-container"></div>
     <div class="secure-note">
       <svg width="11" height="13" viewBox="0 0 11 13" fill="none"><rect x="1" y="5" width="9" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      Secured by Stripe &middot; No account needed
+      Secured by Stripe &middot; Card, Cash App, Bank Transfer &amp; more
     </div>
 
     <div class="donate-trust">
@@ -233,14 +233,30 @@
 
 <script>
   function setAmount(val, btn) {
-    document.getElementById('donate-amount').value = val;
+    const input = document.getElementById('donate-amount');
+    input.value = val;
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
+    input.dispatchEvent(new Event('input')); // keep Stripe Payment Element amount in sync
   }
 
   function clearPresets() {
     document.querySelectorAll('.amount-preset').forEach(b => b.classList.remove('selected'));
   }
+
+  // Handle return from redirect-based payments (bank transfer, Cash App, etc.)
+  (async () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('donated') === '1') {
+      const amount = parseFloat(params.get('amount') || 0);
+      const fid = params.get('fid') || null;
+      if (amount > 0) {
+        await recordDonation({ amount, fundraiserId: fid, provider: 'stripe' });
+      }
+      history.replaceState({}, '', window.location.pathname);
+      alert('Thank you! Your donation means the world to our animals. 🐾');
+    }
+  })();
 
   Payment.render('payment-container', {
     getAmount: () => document.getElementById('donate-amount').value || '50',

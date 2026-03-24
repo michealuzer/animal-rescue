@@ -83,45 +83,54 @@ const PayPalProvider = {
 };
 
 // ── Stripe provider ───────────────────────────────────────────
+// Uses Stripe Payment Element — automatically shows the right payment methods
+// for the customer's region: cards, Cash App Pay (US), ACH bank transfer (US),
+// iDEAL (NL), SEPA (EU), Bancontact (BE), and more.
 
 const StripeProvider = {
   render(containerId, { getAmount, description, fundraiserId = null, onSuccess, onError }) {
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-    const elements = stripe.elements();
-    const card = elements.create('card', {
-      style: {
-        base: {
+    const getAmountCents = () => Math.round(parseFloat(getAmount() || 25) * 100);
+
+    const elements = stripe.elements({
+      mode: 'payment',
+      amount: getAmountCents(),
+      currency: 'usd',
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          colorPrimary: '#2c5c3a',
+          colorBackground: '#ffffff',
+          colorText: '#131d11',
+          colorDanger: '#e53e3e',
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: '15px',
-          color: '#3d2b1f',
-          '::placeholder': { color: '#b0957a' },
+          borderRadius: '8px',
+          spacingUnit: '4px',
         },
-        invalid: { color: '#e53e3e' },
       },
     });
 
+    const paymentElement = elements.create('payment');
+
     const container = document.getElementById(containerId);
     container.innerHTML = `
-      <div style="border:2px solid var(--border-mid);border-radius:var(--radius);padding:12px 14px;background:white;margin-bottom:12px;transition:border-color 0.2s;" id="stripe-card-wrap-${containerId}">
-        <div id="stripe-card-${containerId}"></div>
-      </div>
+      <div id="stripe-payment-${containerId}" style="margin-bottom:14px;"></div>
       <div id="stripe-error-${containerId}" style="display:none;color:#e53e3e;font-size:0.82rem;margin-bottom:10px;"></div>
-      <button id="stripe-submit-${containerId}" style="width:100%;padding:12px;background:var(--forest);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s;">
-        💛 Donate with Card
+      <button id="stripe-submit-${containerId}" style="width:100%;padding:13px;background:var(--forest);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:700;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s;letter-spacing:0.01em;">
+        Donate Now
       </button>
-      <div style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">🔒 Secured by Stripe</div>
     `;
 
-    card.mount('#stripe-card-' + containerId);
+    paymentElement.mount('#stripe-payment-' + containerId);
 
-    card.on('focus', () => {
-      const wrap = document.getElementById('stripe-card-wrap-' + containerId);
-      if (wrap) wrap.style.borderColor = 'var(--green)';
-    });
-    card.on('blur', () => {
-      const wrap = document.getElementById('stripe-card-wrap-' + containerId);
-      if (wrap) wrap.style.borderColor = 'var(--border-mid)';
-    });
+    // Keep amount in sync when the user changes it
+    const amountInput = document.getElementById('donate-amount');
+    if (amountInput) {
+      amountInput.addEventListener('input', () => {
+        const cents = getAmountCents();
+        if (cents >= 100) elements.update({ amount: cents });
+      });
+    }
 
     const submitBtn = document.getElementById('stripe-submit-' + containerId);
     const errorDiv = document.getElementById('stripe-error-' + containerId);
@@ -140,28 +149,51 @@ const StripeProvider = {
       errorDiv.style.display = 'none';
 
       try {
+        const cents = Math.round(amount * 100);
+
+        // Sync final amount, then validate the Payment Element
+        await elements.update({ amount: cents });
+        const { error: submitError } = await elements.submit();
+        if (submitError) {
+          errorDiv.textContent = submitError.message;
+          errorDiv.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.textContent = 'Donate Now';
+          return;
+        }
+
+        // Create payment intent on the server
         const res = await fetch(SUPABASE_URL + '/functions/v1/create-payment-intent', {
           method: 'POST',
           headers: { ...SUPABASE_HEADERS, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: Math.round(amount * 100), currency: 'usd', description }),
+          body: JSON.stringify({ amount: cents, currency: 'usd', description }),
         });
-
         if (!res.ok) throw new Error('Could not initialize payment. Please try again.');
         const { clientSecret, error: fnError } = await res.json();
         if (fnError) throw new Error(fnError);
 
-        const result = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: { card },
+        // Build return URL for redirect-based methods (bank transfer, Cash App, etc.)
+        const returnUrl = window.location.href.split('?')[0]
+          + '?donated=1&amount=' + amount
+          + (fundraiserId ? '&fid=' + fundraiserId : '');
+
+        const { error } = await stripe.confirmPayment({
+          elements,
+          clientSecret,
+          confirmParams: { return_url: returnUrl },
+          redirect: 'if_required', // only redirect when the method requires it
         });
 
-        if (result.error) {
-          errorDiv.textContent = result.error.message;
+        if (error) {
+          errorDiv.textContent = error.message;
           errorDiv.style.display = 'block';
           submitBtn.disabled = false;
           submitBtn.style.opacity = '1';
-          submitBtn.textContent = '💛 Donate with Card';
-          onError(result.error);
+          submitBtn.textContent = 'Donate Now';
+          onError(error);
         } else {
+          // Completed without redirect (e.g. card, Cash App when already authorised)
           await recordDonation({ amount, fundraiserId, provider: 'stripe' });
           onSuccess({ amount, payerName: null });
         }
@@ -170,7 +202,7 @@ const StripeProvider = {
         errorDiv.style.display = 'block';
         submitBtn.disabled = false;
         submitBtn.style.opacity = '1';
-        submitBtn.textContent = '💛 Donate with Card';
+        submitBtn.textContent = 'Donate Now';
         onError(e);
       }
     });
