@@ -24,6 +24,24 @@ async function recordDonation({ amount, fundraiserId = null, payerName = null, p
       }),
     });
 
+    // Email notification via Formspree
+    fetch('https://formspree.io/f/xeerwzod', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name: payerName || 'Anonymous',
+        email: payerEmail || 'not provided',
+        _subject: `💛 New donation — $${parseFloat(amount).toFixed(2)} via ${provider.toUpperCase()}`,
+        message: [
+          `Amount: $${parseFloat(amount).toFixed(2)}`,
+          `Donor: ${payerName || 'Anonymous'}`,
+          `Email: ${payerEmail || '—'}`,
+          `Method: ${provider.toUpperCase()}`,
+          fundraiserId ? `Fundraiser ID: ${fundraiserId}` : 'General donation',
+        ].join('\n'),
+      }),
+    }).catch(() => {}); // fire-and-forget, don't block the donation flow
+
     if (fundraiserId) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/fundraisers?id=eq.${fundraiserId}`, { headers: SUPABASE_HEADERS });
       const [f] = await res.json();
