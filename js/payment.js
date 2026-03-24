@@ -132,6 +132,9 @@ const StripeProvider = {
 
     const container = document.getElementById(containerId);
     container.innerHTML = `
+      <input id="stripe-name-${containerId}" type="text" placeholder="Your name (optional)" autocomplete="name"
+        style="width:100%;padding:11px 13px;border:1.5px solid var(--border-mid);border-radius:var(--radius);font-family:var(--font);font-size:0.95rem;color:var(--text);background:white;box-sizing:border-box;margin-bottom:12px;outline:none;transition:border-color 0.2s;"
+        onfocus="this.style.borderColor='var(--forest)'" onblur="this.style.borderColor='var(--border-mid)'">
       <div id="stripe-payment-${containerId}" style="margin-bottom:14px;"></div>
       <div id="stripe-error-${containerId}" style="display:none;color:#e53e3e;font-size:0.82rem;margin-bottom:10px;"></div>
       <button id="stripe-submit-${containerId}" style="width:100%;padding:13px;background:var(--forest);color:white;border:none;border-radius:var(--radius);font-family:var(--font);font-weight:700;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s;letter-spacing:0.01em;">
@@ -192,8 +195,10 @@ const StripeProvider = {
         if (fnError) throw new Error(fnError);
 
         // Build return URL for redirect-based methods (bank transfer, Cash App, etc.)
+        const payerName = document.getElementById('stripe-name-' + containerId)?.value.trim() || null;
         const returnUrl = window.location.href.split('?')[0]
           + '?donated=1&amount=' + amount
+          + (payerName ? '&name=' + encodeURIComponent(payerName) : '')
           + (fundraiserId ? '&fid=' + fundraiserId : '');
 
         const { error } = await stripe.confirmPayment({
@@ -212,8 +217,9 @@ const StripeProvider = {
           onError(error);
         } else {
           // Completed without redirect (e.g. card, Cash App when already authorised)
-          await recordDonation({ amount, fundraiserId, provider: 'stripe' });
-          onSuccess({ amount, payerName: null });
+          const payerName = document.getElementById('stripe-name-' + containerId)?.value.trim() || null;
+          await recordDonation({ amount, fundraiserId, payerName, provider: 'stripe' });
+          onSuccess({ amount, payerName });
         }
       } catch (e) {
         errorDiv.textContent = e.message || 'Something went wrong. Please try again.';

@@ -250,8 +250,9 @@
     if (params.get('donated') === '1') {
       const amount = parseFloat(params.get('amount') || 0);
       const fid = params.get('fid') || null;
+      const name = params.get('name') || null;
       if (amount > 0) {
-        await recordDonation({ amount, fundraiserId: fid, provider: 'stripe' });
+        await recordDonation({ amount, fundraiserId: fid, payerName: name, provider: 'stripe' });
       }
       history.replaceState({}, '', window.location.pathname);
       alert('Thank you! Your donation means the world to our animals. 🐾');
