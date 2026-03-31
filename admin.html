@@ -67,6 +67,7 @@
   <button onclick="showPanel('animals')">🐾 Animals</button>
   <button onclick="showPanel('applications')">📝 Applications</button>
   <button onclick="showPanel('fundraisers')">💛 Fundraisers</button>
+  <button onclick="showPanel('donations')">💰 Donations</button>
 </div>
 
 <!-- ADMIN LAYOUT -->
@@ -82,6 +83,7 @@
       <a href="#" onclick="showPanel('applications')" id="nav-applications">📝 Applications</a>
       <a href="#" onclick="showPanel('add-fundraiser')" id="nav-add-fundraiser">🎯 New Fundraiser</a>
       <a href="#" onclick="showPanel('fundraisers')" id="nav-fundraisers">💛 Fundraisers</a>
+      <a href="#" onclick="showPanel('donations')" id="nav-donations">💰 Donations</a>
     </nav>
     <div style="margin-top:40px;border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;">
       <a href="index.html" style="color:rgba(255,255,255,0.5);font-size:0.85rem;">← Back to Website</a>
@@ -151,8 +153,11 @@
               </select>
             </div>
             <div class="form-group full">
-              <label>Photo URL</label>
-              <input type="url" class="form-input" id="an-photo" placeholder="https://...jpg"/>
+              <label>Photo</label>
+              <input type="file" class="form-input" id="an-photo-file" accept="image/*" onchange="previewUpload(this, 'an-photo-preview')" style="padding:8px;"/>
+              <img id="an-photo-preview" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:8px;margin-top:8px;"/>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">Or paste a URL:</div>
+              <input type="url" class="form-input" id="an-photo" placeholder="https://...jpg" style="margin-top:4px;"/>
             </div>
             <div class="form-group full">
               <label>Description</label>
@@ -266,8 +271,11 @@
               <input type="number" class="form-input" id="fr-goal" value="1000" min="1" required/>
             </div>
             <div class="form-group full">
-              <label>Cover Image URL</label>
-              <input type="url" class="form-input" id="fr-image" placeholder="https://...jpg"/>
+              <label>Cover Image</label>
+              <input type="file" class="form-input" id="fr-image-file" accept="image/*" onchange="previewUpload(this, 'fr-image-preview')" style="padding:8px;"/>
+              <img id="fr-image-preview" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:8px;margin-top:8px;"/>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">Or paste a URL:</div>
+              <input type="url" class="form-input" id="fr-image" placeholder="https://...jpg" style="margin-top:4px;"/>
             </div>
             <div class="form-group full">
               <label>Description</label>
@@ -306,6 +314,34 @@
       </div>
     </div>
 
+    <!-- DONATIONS -->
+    <div class="admin-panel" id="panel-donations">
+      <div class="admin-header"><h1>Donation History</h1></div>
+      <div class="admin-stat-grid" style="margin-bottom:24px;">
+        <div class="admin-stat-card"><div class="num" id="don-total">—</div><div class="label">Total Raised</div></div>
+        <div class="admin-stat-card"><div class="num" id="don-count">—</div><div class="label">Total Donations</div></div>
+        <div class="admin-stat-card"><div class="num" id="don-avg">—</div><div class="label">Average Donation</div></div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Donor</th>
+              <th>Email</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Fundraiser</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="donations-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /admin-main -->
 </div><!-- /admin-layout -->
 
@@ -315,6 +351,32 @@
   const { createClient } = window.supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
   const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
+  // ── Image upload helpers ─────────────────────────────────────
+  function previewUpload(input, previewId) {
+    const preview = document.getElementById(previewId);
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => { preview.src = e.target.result; preview.style.display = 'block'; };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  async function uploadImage(fileInput, folder) {
+    if (!fileInput.files || !fileInput.files[0]) return null;
+    const file = fileInput.files[0];
+    const ext = file.name.split('.').pop();
+    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { data, error } = await sb.storage.from('images').upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: false,
+    });
+    if (error) throw new Error('Image upload failed: ' + error.message);
+    const { data: urlData } = sb.storage.from('images').getPublicUrl(fileName);
+    return urlData.publicUrl;
+  }
 
   // Auth guard
   sb.auth.getSession().then(({ data }) => {
@@ -332,7 +394,7 @@
   }
 
   // Panel navigation
-  const panels = ['dashboard','add-animal','animals','applications','add-fundraiser','fundraisers'];
+  const panels = ['dashboard','add-animal','animals','applications','add-fundraiser','fundraisers','donations'];
   function showPanel(name) {
     panels.forEach(p => {
       document.getElementById('panel-' + p).classList.remove('active');
@@ -348,6 +410,7 @@
     if (name === 'animals') loadAnimalsTable();
     if (name === 'applications') loadApplicationsTable();
     if (name === 'fundraisers') loadFundraisersTable();
+    if (name === 'donations') loadDonationsTable();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return false;
   }
@@ -375,6 +438,16 @@
     btn.disabled = true; btn.textContent = 'Saving...';
     const msgEl = document.getElementById('add-animal-msg');
 
+    let photoUrl = document.getElementById('an-photo').value || null;
+    try {
+      const uploaded = await uploadImage(document.getElementById('an-photo-file'), 'animals');
+      if (uploaded) photoUrl = uploaded;
+    } catch (uploadErr) {
+      msgEl.innerHTML = `<div class="alert alert-error">⚠️ ${uploadErr.message}</div>`;
+      btn.disabled = false; btn.textContent = 'Add Animal 🐾';
+      return;
+    }
+
     const payload = {
       name: document.getElementById('an-name').value,
       species: document.getElementById('an-species').value,
@@ -382,7 +455,7 @@
       age: document.getElementById('an-age').value || null,
       size: document.getElementById('an-size').value || null,
       gender: document.getElementById('an-gender').value || null,
-      photo_url: document.getElementById('an-photo').value || null,
+      photo_url: photoUrl,
       description: document.getElementById('an-desc').value || null,
       status: document.getElementById('an-status').value,
       posted_by: document.getElementById('an-posted-by').value || null,
@@ -547,11 +620,21 @@ Experience: ${a.experience || 'N/A'}`);
     btn.disabled = true; btn.textContent = 'Creating...';
     const msgEl = document.getElementById('add-fundraiser-msg');
 
+    let imageUrl = document.getElementById('fr-image').value || null;
+    try {
+      const uploaded = await uploadImage(document.getElementById('fr-image-file'), 'fundraisers');
+      if (uploaded) imageUrl = uploaded;
+    } catch (uploadErr) {
+      msgEl.innerHTML = `<div class="alert alert-error">⚠️ ${uploadErr.message}</div>`;
+      btn.disabled = false; btn.textContent = 'Create Fundraiser 🎯';
+      return;
+    }
+
     const payload = {
       title: document.getElementById('fr-title').value,
       organizer_name: document.getElementById('fr-organizer').value || null,
       goal: parseFloat(document.getElementById('fr-goal').value),
-      image_url: document.getElementById('fr-image').value || null,
+      image_url: imageUrl,
       description: document.getElementById('fr-desc').value || null,
       raised: 0,
       donor_count: 0,
@@ -626,6 +709,49 @@ Experience: ${a.experience || 'N/A'}`);
     await fetch(SUPABASE_URL + '/rest/v1/fundraisers?id=eq.' + id, { method: 'DELETE', headers });
     loadFundraisersTable();
     loadDashboard();
+  }
+
+  // Donations Table
+  async function loadDonationsTable() {
+    const tbody = document.getElementById('donations-tbody');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Loading...</td></tr>';
+    try {
+      // Fetch donations and fundraisers in parallel
+      const [donRes, frRes] = await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/donations?order=created_at.desc', { headers }),
+        fetch(SUPABASE_URL + '/rest/v1/fundraisers?select=id,title', { headers }),
+      ]);
+      const donations = await donRes.json();
+      const fundraisers = await frRes.json();
+      const frMap = {};
+      (fundraisers || []).forEach(f => frMap[f.id] = f.title);
+
+      // Summary stats
+      const total = donations.reduce((s, d) => s + parseFloat(d.amount || 0), 0);
+      const count = donations.length;
+      document.getElementById('don-total').textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('don-count').textContent = count;
+      document.getElementById('don-avg').textContent = count > 0
+        ? '$' + (total / count).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : '—';
+
+      if (!donations.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">No donations yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = donations.map(d => `
+        <tr>
+          <td style="font-size:0.82rem;color:var(--text-muted);white-space:nowrap;">${new Date(d.created_at).toLocaleDateString()} ${new Date(d.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td>
+          <td><strong>${d.payer_name || 'Anonymous'}</strong></td>
+          <td style="font-size:0.82rem;">${d.payer_email || '—'}</td>
+          <td style="font-weight:700;color:var(--green);">$${parseFloat(d.amount).toFixed(2)}</td>
+          <td><span class="badge badge-${d.provider === 'stripe' ? 'active' : 'pending'}">${d.provider}</span></td>
+          <td style="font-size:0.82rem;">${d.fundraiser_id ? (frMap[d.fundraiser_id] || 'Unknown') : 'General'}</td>
+          <td><span class="badge badge-${d.status === 'completed' ? 'available' : 'pending'}">${d.status}</span></td>
+        </tr>`).join('');
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Error loading donations.</td></tr>';
+    }
   }
 </script>
 </body>

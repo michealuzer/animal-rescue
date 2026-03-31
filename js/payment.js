@@ -42,27 +42,8 @@ async function recordDonation({ amount, fundraiserId = null, payerName = null, p
       }),
     }).catch(() => {}); // fire-and-forget, don't block the donation flow
 
-    if (fundraiserId) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/fundraisers?id=eq.${fundraiserId}`, { headers: SUPABASE_HEADERS });
-      const [f] = await res.json();
-      if (f) {
-        await fetch(`${SUPABASE_URL}/rest/v1/fundraisers?id=eq.${fundraiserId}`, {
-          method: 'PATCH',
-          headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ raised: parseFloat(f.raised || 0) + parseFloat(amount), donor_count: (f.donor_count || 0) + 1 }),
-        });
-      }
-    } else {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/donation_stats?id=eq.1`, { headers: SUPABASE_HEADERS });
-      const [s] = await res.json();
-      if (s) {
-        await fetch(`${SUPABASE_URL}/rest/v1/donation_stats?id=eq.1`, {
-          method: 'PATCH',
-          headers: { ...SUPABASE_HEADERS, 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ total_raised: parseFloat(s.total_raised || 0) + parseFloat(amount), donor_count: (s.donor_count || 0) + 1 }),
-        });
-      }
-    }
+    // Stats (fundraiser raised/donor_count and donation_stats) are updated
+    // automatically by a Supabase database trigger on donations insert.
   } catch (e) {
     console.error('recordDonation error', e);
   }
